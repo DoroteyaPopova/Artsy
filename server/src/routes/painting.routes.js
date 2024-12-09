@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Painting = require('../models/Painting');
+const Painting = require('../models/classesModel.js');
 
 // Create a new painting
 router.post('/', async (req, res) => {

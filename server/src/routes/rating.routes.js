@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Rating = require('../models/Rating');
+const Rating = require('../models//ratingModel.js');
 
 // Create a new rating
 router.post('/', async (req, res) => {
