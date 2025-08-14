@@ -47,7 +47,6 @@ export class HomeComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading featured painting:', error);
-        // Don't show error message to user, just don't display the section
         this.errorFeatured = 'Failed to load featured painting';
         this.loadingFeatured = false;
       },
