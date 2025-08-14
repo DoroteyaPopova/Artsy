@@ -1,0 +1,121 @@
+/*  Orpheus Pro  */
+@import url(https://db.onlinewebfonts.com/c/2aea0ac500c896188f9ad191c231029c?family=Orpheus+Pro);
+
+/* Adobe Garamond Pro */
+@font-face {
+  font-family: "Adobe Garamond Pro Regular";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../Fonts/AGaramondPro-Regular.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Adobe Garamond Pro Italic";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../Fonts/AGaramondPro-Italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Adobe Garamond Pro Bold";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../Fonts/AGaramondPro-Bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Adobe Garamond Pro Bold Italic";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../Fonts/AGaramondPro-BoldItalic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Orpheus Pro";
+  src: url("https://db.onlinewebfonts.com/t/2aea0ac500c896188f9ad191c231029c.eot");
+  src: url("https://db.onlinewebfonts.com/t/2aea0ac500c896188f9ad191c231029c.eot?#iefix")
+      format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/2aea0ac500c896188f9ad191c231029c.woff2")
+      format("woff2"),
+    url("https://db.onlinewebfonts.com/t/2aea0ac500c896188f9ad191c231029c.woff")
+      format("woff"),
+    url("https://db.onlinewebfonts.com/t/2aea0ac500c896188f9ad191c231029c.ttf")
+      format("truetype"),
+    url("https://db.onlinewebfonts.com/t/2aea0ac500c896188f9ad191c231029c.svg#Orpheus Pro")
+      format("svg");
+}
+
+/* Global Reset and Box-sizing */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Base Styles */
+* {
+  font-family: "Adobe Garamond Pro Regular";
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Orpheus Pro";
+}
+
+/* Body - Fixed responsive design */
+body {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-image: url(../public/images/white-background.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Main container - responsive */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1400px;
+  min-height: calc(100vh - 150px);
+  padding: 50px 20px 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1440px) {
+  main {
+    max-width: 1200px;
+    padding: 40px 20px 20px;
+  }
+}
+
+@media (max-width: 1200px) {
+  main {
+    max-width: 100%;
+    padding: 30px 15px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding: 20px 10px 20px;
+    min-height: calc(100vh - 120px);
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 15px 8px 15px;
+  }
+}
