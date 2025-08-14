@@ -1,0 +1,72 @@
+<!-- src/app/register/register.component.html -->
+<main>
+  <section>
+    <h1>Register</h1>
+
+    <div *ngIf="success" class="success-message">
+      {{ success }}
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+
+    <div class="column-login">
+      <label for="username">Username</label>
+      <input
+        type="text"
+        placeholder="Username"
+        id="username"
+        [(ngModel)]="username"
+        name="username"
+        required
+      />
+    </div>
+
+    <div class="column-login">
+      <label for="email">Email</label>
+      <input
+        type="email"
+        placeholder="Email"
+        id="email"
+        [(ngModel)]="email"
+        name="email"
+        required
+      />
+    </div>
+
+    <div class="column-login">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        placeholder="Password"
+        id="password"
+        [(ngModel)]="password"
+        name="password"
+        required
+      />
+    </div>
+
+    <div class="column-login">
+      <label for="repass">Confirm Password</label>
+      <input
+        type="password"
+        placeholder="Confirm Password"
+        id="repass"
+        [(ngModel)]="repass"
+        name="repass"
+        required
+      />
+    </div>
+
+    <button type="button" (click)="onRegister()" [disabled]="loading">
+      <span *ngIf="loading">Creating Account...</span>
+      <span *ngIf="!loading">Register</span>
+    </button>
+
+    <p>
+      Already have an account?
+      <a routerLink="/login">Login here</a>
+    </p>
+  </section>
+</main>
