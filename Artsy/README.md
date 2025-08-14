@@ -1,1 +1,0 @@
-This is my fron-end side of the Angular project.
