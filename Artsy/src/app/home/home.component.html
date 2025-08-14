@@ -1,0 +1,39 @@
+<main>
+  <div class="row-box">
+    <div class="left-side">
+      <h1>Community's Top Rated Artwork</h1>
+      <div class="img-container" *ngIf="!loadingFeatured && featuredPainting">
+        <img
+          [src]="featuredPainting.image"
+          [alt]="featuredPainting.title"
+          (click)="viewPainting(featuredPainting._id)"
+        />
+      </div>
+    </div>
+    <div class="text-container">
+      <div class="top-text">
+        <h1>Finest Art.</h1>
+        <p>
+          Welcome to the world's most popular online art gallery! Here you can
+          share, buy, like and discuss awesome art pieces.
+        </p>
+      </div>
+      <div class="bottom-text">
+        <div class="first-link">
+          <h2>Looking for inspiration?</h2>
+          <div class="check-row">
+            <p>Check what others have made!</p>
+            <button (click)="goToGallery()">Gallery</button>
+          </div>
+        </div>
+        <div class="first-link">
+          <h2>Want to learn something new?</h2>
+          <div class="check-row">
+            <p>Check out our courses!</p>
+            <button (click)="goToCourses()">Courses</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
