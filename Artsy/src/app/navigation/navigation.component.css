@@ -1,0 +1,178 @@
+/* src/app/navigation/navigation.component.css */
+nav {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 0 20px;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1400px;
+  box-sizing: border-box;
+}
+
+.nav-row {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.nav-row a {
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: black;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.nav-row a:hover {
+  color: #666;
+}
+
+.nav-profile {
+  position: absolute;
+  right: 20px;
+}
+
+.profile-section {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.profile-link,
+.logout-link {
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: black;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.profile-link:hover,
+.logout-link:hover {
+  color: #666;
+}
+
+.nav-heading {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-heading h2 {
+  font-size: 3.5rem;
+  font-style: italic;
+  color: black;
+  margin: 0;
+  font-family: "Orpheus Pro", serif;
+}
+
+/* Responsive Navigation */
+@media (max-width: 1200px) {
+  .nav-heading h2 {
+    font-size: 3rem;
+  }
+
+  .nav-row a,
+  .profile-link,
+  .logout-link {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  nav {
+    height: 80px;
+    padding: 0 15px;
+  }
+
+  .nav-heading h2 {
+    font-size: 2.5rem;
+  }
+
+  .nav-row {
+    gap: 20px;
+  }
+
+  .nav-row a,
+  .profile-link,
+  .logout-link {
+    font-size: 1.1rem;
+  }
+
+  .profile-section {
+    gap: 20px;
+  }
+
+  .nav-profile {
+    right: 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  nav {
+    flex-direction: column;
+    height: auto;
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .nav-heading {
+    position: static;
+    transform: none;
+    order: 1;
+  }
+
+  .nav-row {
+    order: 2;
+    justify-content: center;
+  }
+
+  .nav-profile {
+    position: static;
+    order: 3;
+    text-align: center;
+  }
+
+  .profile-section {
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .nav-heading h2 {
+    font-size: 2rem;
+  }
+
+  .nav-row a,
+  .profile-link,
+  .logout-link {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 10px;
+  }
+  .painting-title {
+    font-size: 1.6rem;
+  }
+  .image-container {
+    max-width: 100%;
+  }
+  .comments-section h2 {
+    font-size: 1.3rem;
+  }
+  .add-comment {
+    padding: 15px;
+  }
+  .comment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  .replies {
+    padding-left: 10px;
+  }
+}

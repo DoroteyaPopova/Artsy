@@ -1,0 +1,31 @@
+<!-- src/app/navigation/navigation.component.html -->
+<nav>
+  <div class="nav-row">
+    <!-- Always show these -->
+    <a routerLink="/">Home</a>
+    <a routerLink="/gallery">Gallery</a>
+    <a routerLink="/courses">Courses</a>
+    <a routerLink="/about">About</a>
+
+    <!-- Show only when NOT logged in -->
+    <a *ngIf="!isLoggedIn" routerLink="/login">Login</a>
+    <a *ngIf="!isLoggedIn" routerLink="/register">Register</a>
+
+    <!-- Show only when logged in  -->
+    <a *ngIf="isLoggedIn" routerLink="/upload">Upload</a>
+  </div>
+
+  <div class="nav-heading">
+    <h2>Artsy</h2>
+  </div>
+
+  <div class="nav-profile">
+    <!-- Show profile link and logout when logged in -->
+    <div *ngIf="isLoggedIn" class="profile-section">
+      <a routerLink="/profile" class="profile-link"> Your Profile </a>
+      <a routerLink="/logout" class="logout-link">Logout</a>
+    </div>
+    <!-- Show nothing when not logged in -->
+    <span *ngIf="!isLoggedIn"></span>
+  </div>
+</nav>
