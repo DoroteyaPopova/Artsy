@@ -1,0 +1,141 @@
+<main class="course-details">
+  <div *ngIf="loading" class="loading-container">
+    <p>Loading course details...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="error-container">
+    <p>{{ error }}</p>
+    <button (click)="goBack()">Back to Courses</button>
+  </div>
+
+  <div *ngIf="!loading && !error && course" class="course-container">
+    <button class="back-button" (click)="goBack()">
+      <fa-icon [icon]="faArrowLeft"></fa-icon>
+      Back to Courses
+    </button>
+    <div class="course-header">
+      <div class="course-image">
+        <img
+          [src]="course.image || '/images/default-course.jpg'"
+          [alt]="course.title"
+          onerror="this.src='/images/default-course.jpg'"
+        />
+      </div>
+
+      <div class="course-info">
+        <h1>{{ course.title }}</h1>
+        <p class="instructor">by {{ course.teacherName }}</p>
+
+        <div class="course-meta">
+          <span class="category">{{ getCategoryLabel(course.category) }}</span>
+          <span class="level">{{ getLevelLabel(course.level) }}</span>
+        </div>
+      </div>
+
+      <div class="course-actions">
+        <div class="price">{{ formatPrice(course.cost) }}</div>
+        <div class="enrollment-status">
+          <span
+            class="status-badge"
+            [class.available]="canEnroll(course)"
+            [class.full]="isCourseFull(course)"
+            [class.started]="hasStarted(course)"
+          >
+            {{ getEnrollmentStatus(course) }}
+          </span>
+        </div>
+        <button
+          *ngIf="canEnroll(course)"
+          class="enroll-btn"
+          (click)="enrollInCourse()"
+        >
+          <fa-icon [icon]="faGraduationCap"></fa-icon>
+          Enroll Now
+        </button>
+      </div>
+    </div>
+
+    <div class="course-content">
+      <section class="description-section">
+        <h2>About This Course</h2>
+        <p>{{ course.description }}</p>
+      </section>
+
+      <section class="details-section">
+        <h2>Course Details</h2>
+        <div class="details-grid">
+          <div class="detail-item">
+            <fa-icon [icon]="faClock"></fa-icon>
+            <div>
+              <strong>Duration</strong>
+              <span>{{ formatDuration(course.duration) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <fa-icon [icon]="faCalendar"></fa-icon>
+            <div>
+              <strong>Schedule</strong>
+              <span>{{ formatSchedule(course.schedule) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <fa-icon [icon]="faCalendar"></fa-icon>
+            <div>
+              <strong>Course Dates</strong>
+              <span
+                >{{ formatDate(course.startDate) }} -
+                {{ formatDate(course.endDate) }}</span
+              >
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <fa-icon [icon]="faUsers"></fa-icon>
+            <div>
+              <strong>Class Size</strong>
+              <span
+                >{{ course.currentStudents }}/{{
+                  course.maxStudents
+                }}
+                students</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section *ngIf="course.requirements" class="requirements-section">
+        <h2>Requirements</h2>
+        <p>{{ course.requirements }}</p>
+      </section>
+
+      <section *ngIf="course.materials" class="materials-section">
+        <h2>Materials Needed</h2>
+        <p>{{ course.materials }}</p>
+      </section>
+
+      <section
+        *ngIf="course.tags && course.tags.length > 0"
+        class="tags-section"
+      >
+        <h2>Course Tags</h2>
+        <div class="tags">
+          <span *ngFor="let tag of course.tags" class="tag">{{ tag }}</span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <app-confirmation-modal
+    [isVisible]="showLoginModal"
+    [title]="'Login'"
+    [message]="'Please log in to enroll in courses'"
+    [confirmText]="'Login'"
+    [type]="'warning'"
+    (confirmed)="onLoginConfirmed()"
+    (cancelled)="onLoginCancelled()"
+  >
+  </app-confirmation-modal>
+</main>
