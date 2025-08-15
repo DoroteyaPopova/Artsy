@@ -1,0 +1,243 @@
+<main>
+  <div *ngIf="loading" class="loading-container">
+    <p>Loading painting details...</p>
+  </div>
+
+  <div *ngIf="error" class="error-container">
+    <p>{{ error }}</p>
+    <button (click)="goBack()">Back to Gallery</button>
+  </div>
+
+  <div *ngIf="!loading && !error && painting" class="painting-details">
+    <button class="back-button" (click)="goBack()">← Back to Gallery</button>
+
+    <div class="main-content">
+      <div class="image-section">
+        <div class="image-container">
+          <img [src]="painting.image" [alt]="painting.title" />
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h1 class="painting-title">{{ painting.title }}</h1>
+
+        <p class="painting-author">by {{ painting.author }}</p>
+
+        <div class="painting-type">
+          <strong>Type:</strong>
+          {{
+            painting.category === "digital"
+              ? "Digital Art"
+              : "Canvas/Traditional"
+          }}
+        </div>
+
+        <div class="painting-dimensions" *ngIf="painting.dimensions">
+          <strong>Dimensions:</strong>
+          {{ painting.dimensions.width }} × {{ painting.dimensions.height }}
+          {{ painting.dimensions.unit }}
+        </div>
+
+        <div class="painting-description">
+          <strong>Description:</strong>
+          <p>{{ painting.description }}</p>
+        </div>
+
+        <div class="rating-section">
+          <strong>Rating:</strong>
+          <div class="rating-display">
+            <div class="average-rating" *ngIf="painting.averageRating > 0">
+              <div class="stars">
+                <fa-icon
+                  *ngFor="let star of getStarArray(painting.averageRating)"
+                  [icon]="star ? solidStarIcon : starIcon"
+                >
+                </fa-icon>
+              </div>
+              <span class="rating-text">
+                {{ painting.averageRating | number : "1.1-1" }}/5 ({{
+                  painting.ratingCount
+                }}
+                {{ painting.ratingCount === 1 ? "rating" : "ratings" }})
+              </span>
+            </div>
+
+            <div class="owner-message" *ngIf="isOwner">
+              <p class="owner-note">
+                This is your painting. You cannot rate your own work.
+              </p>
+              <div class="owner-stars" *ngIf="painting.averageRating > 0">
+                <span class="owner-rating-label"
+                  >Current rating from others:</span
+                >
+                <div class="stars">
+                  <fa-icon
+                    *ngFor="let star of getStarArray(painting.averageRating)"
+                    [icon]="star ? solidStarIcon : starIcon"
+                  >
+                  </fa-icon>
+                </div>
+                <span class="rating-text">
+                  {{ painting.averageRating | number : "1.1-1" }}/5
+                </span>
+              </div>
+            </div>
+
+            <div class="interactive-rating" *ngIf="isLoggedIn && !isOwner">
+              <p class="rating-prompt" *ngIf="!hasUserRated">
+                Rate this painting:
+              </p>
+              <p class="rating-prompt" *ngIf="hasUserRated">
+                Your rating: {{ currentUserRating }}/5 (click to change)
+              </p>
+              <div class="interactive-stars">
+                <fa-icon
+                  *ngFor="let i of [1, 2, 3, 4, 5]"
+                  [icon]="getRatingStarType(i)"
+                  [class.interactive]="true"
+                  [class.user-rated]="hasUserRated"
+                  (click)="setRating(i)"
+                  (mouseenter)="onRatingHover(i)"
+                  (mouseleave)="onRatingLeave()"
+                >
+                </fa-icon>
+              </div>
+            </div>
+
+            <div class="login-prompt" *ngIf="!isLoggedIn">
+              <p><a routerLink="/login">Log in</a> to rate this painting.</p>
+            </div>
+
+            <div
+              class="no-rating"
+              *ngIf="painting.averageRating === 0 && !isOwner"
+            >
+              <p>No ratings yet. Be the first to rate!</p>
+            </div>
+
+            <div
+              class="no-rating"
+              *ngIf="painting.averageRating === 0 && isOwner"
+            >
+              <p>Your painting hasn't been rated yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="rating-confirm-overlay"
+          *ngIf="showRatingConfirm"
+          (click)="cancelRatingChange()"
+        >
+          <div class="rating-confirm-dialog" (click)="$event.stopPropagation()">
+            <h3>Change Your Rating</h3>
+            <p>You previously rated this painting {{ currentUserRating }}/5.</p>
+            <p>Are you sure you want to change it to {{ pendingRating }}/5?</p>
+            <div class="confirm-actions">
+              <button class="confirm-btn" (click)="confirmRatingChange()">
+                Yes, Change Rating
+              </button>
+              <button class="cancel-btn" (click)="cancelRatingChange()">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-prompt" *ngIf="!isLoggedIn">
+          <p>
+            <a routerLink="/login">Log in</a> to rate and comment on this
+            painting.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="comments-section">
+      <h2>Comments ({{ comments.length }})</h2>
+
+      <div class="add-comment" *ngIf="isLoggedIn">
+        <h3>Add a comment</h3>
+        <textarea
+          [(ngModel)]="newComment"
+          placeholder="Write your comment..."
+          rows="4"
+        >
+        </textarea>
+        <button
+          class="submit-comment-btn"
+          (click)="submitComment()"
+          [disabled]="!newComment.trim()"
+        >
+          Post Comment
+        </button>
+      </div>
+
+      <div class="comments-list" *ngIf="comments.length > 0">
+        <div class="comment" *ngFor="let comment of comments">
+          <div class="comment-content">
+            <div class="comment-header">
+              <strong class="comment-author">{{
+                comment.userId.username
+              }}</strong>
+              <span class="comment-date">{{
+                formatDate(comment.createdAt)
+              }}</span>
+            </div>
+            <p class="comment-text">{{ comment.content }}</p>
+            <button
+              class="reply-btn"
+              *ngIf="isLoggedIn"
+              (click)="startReply(comment._id)"
+            >
+              Reply
+            </button>
+          </div>
+
+          <div class="reply-form" *ngIf="replyingToId === comment._id">
+            <textarea
+              [(ngModel)]="replyContent"
+              placeholder="Write your reply..."
+              rows="3"
+            >
+            </textarea>
+            <div class="reply-actions">
+              <button
+                class="submit-reply-btn"
+                (click)="submitReply(comment._id)"
+              >
+                Post Reply
+              </button>
+              <button class="cancel-reply-btn" (click)="cancelReply()">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="replies"
+            *ngIf="comment.replies && comment.replies.length > 0"
+          >
+            <div class="reply" *ngFor="let reply of comment.replies">
+              <div class="reply-content">
+                <div class="reply-header">
+                  <strong class="reply-author">{{
+                    reply.userId.username
+                  }}</strong>
+                  <span class="reply-date">{{
+                    formatDate(reply.createdAt)
+                  }}</span>
+                </div>
+                <p class="reply-text">{{ reply.content }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="no-comments" *ngIf="comments.length === 0">
+        <p>No comments yet. Be the first to comment!</p>
+      </div>
+    </div>
+  </div>
+</main>
