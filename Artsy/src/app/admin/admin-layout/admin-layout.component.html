@@ -1,0 +1,88 @@
+<div class="admin-container">
+  <nav class="admin-sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <div class="logo">
+        <h2>Artsy Admin</h2>
+      </div>
+      <button
+        class="close-btn"
+        (click)="closeSidebar()"
+        [class.visible]="sidebarOpen"
+      >
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </button>
+    </div>
+
+    <ul class="nav-menu">
+      <li *ngFor="let item of navItems" class="nav-item">
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-link"
+          (click)="closeSidebar()"
+        >
+          <fa-icon [icon]="item.icon" class="nav-icon"></fa-icon>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="user-info" *ngIf="currentUser">
+        <div class="user-avatar">
+          <fa-icon [icon]="faUsers"></fa-icon>
+        </div>
+        <div class="user-details">
+          <p class="user-name">{{ currentUser.username }}</p>
+          <p class="user-role">Administrator</p>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <button
+          class="footer-btn"
+          (click)="goToMainSite()"
+          title="Go to Main Site"
+        >
+          <fa-icon [icon]="faHome"></fa-icon>
+          <span>Main Site</span>
+        </button>
+        <button class="footer-btn logout-btn" (click)="logout()" title="Logout">
+          <fa-icon [icon]="faSignOutAlt"></fa-icon>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="admin-main" [class.sidebar-open]="sidebarOpen">
+    <header class="admin-header">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <fa-icon [icon]="faBars"></fa-icon>
+      </button>
+
+      <div class="header-title">
+        <h1>Admin Panel</h1>
+      </div>
+
+      <div class="header-actions">
+        <div class="user-menu" *ngIf="currentUser">
+          <span class="welcome-text">Welcome, {{ currentUser.username }}</span>
+          <button class="logout-btn-header" (click)="logout()">
+            <fa-icon [icon]="faSignOutAlt"></fa-icon>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <div
+    class="mobile-overlay"
+    [class.visible]="sidebarOpen"
+    (click)="closeSidebar()"
+  ></div>
+</div>
