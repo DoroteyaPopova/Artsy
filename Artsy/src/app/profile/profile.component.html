@@ -1,0 +1,439 @@
+<main>
+  <div *ngIf="loading" class="loading-container">
+    <p>Loading your profile...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="success-message">
+    {{ success }}
+  </div>
+
+  <div *ngIf="!loading && user" class="profile-container">
+    <div class="profile-header">
+      <div class="user-avatar">
+        <img
+          *ngIf="hasProfilePicture()"
+          [src]="getProfilePictureUrl()"
+          [alt]="user.username + ' profile picture'"
+          class="avatar-image"
+        />
+        <fa-icon
+          *ngIf="!hasProfilePicture()"
+          [icon]="faUser"
+          class="avatar-icon"
+        ></fa-icon>
+      </div>
+      <div class="user-info">
+        <h1>{{ user.username }}</h1>
+        <p class="user-email">
+          <fa-icon [icon]="faEnvelope"></fa-icon>
+          {{ user.email }}
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          *ngIf="isAdmin"
+          class="admin-panel-btn"
+          (click)="goToAdminPanel()"
+          title="Access Admin Panel"
+        >
+          <fa-icon [icon]="faCog"></fa-icon>
+          <span>Admin Panel</span>
+        </button>
+
+        <button
+          *ngIf="isTeacher && !isAdmin"
+          class="admin-panel-btn"
+          (click)="goToTeacherPanel()"
+          title="Access Teacher Dashboard"
+        >
+          <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+          <span>Teacher Panel</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="profile-content">
+      <div class="user-details-section">
+        <div class="section-header">
+          <h2>Profile Information</h2>
+          <button
+            *ngIf="!isEditingProfile"
+            class="edit-btn"
+            (click)="startEditingProfile()"
+          >
+            <fa-icon [icon]="faEdit"></fa-icon>
+            Edit Profile
+          </button>
+        </div>
+        <div *ngIf="!isEditingProfile" class="profile-display">
+          <div class="info-group">
+            <label>Profile Picture</label>
+            <div class="avatar-display">
+              <img
+                *ngIf="hasProfilePicture()"
+                [src]="getProfilePictureUrl()"
+                [alt]="user.username + ' profile picture'"
+                class="profile-avatar-preview"
+              />
+              <div *ngIf="!hasProfilePicture()" class="no-avatar">
+                <fa-icon [icon]="faUser"></fa-icon>
+                <span>No profile picture</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-group">
+            <label>Username</label>
+            <p>{{ user.username }}</p>
+          </div>
+
+          <div class="info-group">
+            <label>Email</label>
+            <p>{{ user.email }}</p>
+          </div>
+
+          <div class="info-group">
+            <label>Bio</label>
+            <p>{{ user.bio || "No bio added yet." }}</p>
+          </div>
+
+          <div class="info-group">
+            <label>Location</label>
+            <p>{{ user.location || "Location not specified." }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="isEditingProfile" class="profile-edit">
+          <form (ngSubmit)="saveProfile()">
+            <div class="form-group">
+              <label for="avatar">Profile Picture URL</label>
+              <input
+                type="url"
+                id="avatar"
+                [(ngModel)]="editProfileForm.avatar"
+                name="avatar"
+                placeholder="https://example.com/your-profile-picture.jpg"
+              />
+              <small class="avatar-help">
+                Upload your image to
+                <a href="https://postimages.org/" target="_blank">PostImage</a>,
+                <a href="https://imgur.com/" target="_blank">Imgur</a>, or
+                similar service and paste the URL here.
+              </small>
+
+              <div
+                class="avatar-preview-container"
+                *ngIf="editProfileForm.avatar"
+              >
+                <label>Preview:</label>
+                <div class="avatar-preview">
+                  <img
+                    *ngIf="previewAvatar()"
+                    [src]="editProfileForm.avatar"
+                    alt="Avatar preview"
+                    class="preview-avatar-image"
+                  />
+                  <div *ngIf="!previewAvatar()" class="invalid-avatar">
+                    <fa-icon [icon]="faUser"></fa-icon>
+                    <span>Invalid image URL</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                [(ngModel)]="editProfileForm.username"
+                name="username"
+                required
+                maxlength="50"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                [(ngModel)]="editProfileForm.email"
+                name="email"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="bio">Bio</label>
+              <textarea
+                id="bio"
+                [(ngModel)]="editProfileForm.bio"
+                name="bio"
+                rows="4"
+                maxlength="500"
+                placeholder="Tell us about yourself..."
+              ></textarea>
+              <small>{{ editProfileForm.bio.length }}/500 characters</small>
+            </div>
+
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input
+                type="text"
+                id="location"
+                [(ngModel)]="editProfileForm.location"
+                name="location"
+                maxlength="100"
+                placeholder="City, Country"
+              />
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="cancel-btn"
+                (click)="cancelEditingProfile()"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="save-btn"
+                [disabled]="profileUpdateLoading"
+              >
+                <span *ngIf="profileUpdateLoading">Saving...</span>
+                <span *ngIf="!profileUpdateLoading">Save Changes</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="content-sections">
+        <div class="paintings-section">
+          <div class="section-header">
+            <h2>
+              <fa-icon [icon]="faPaintBrush"></fa-icon>
+              My Paintings ({{ userPaintings.length }})
+            </h2>
+            <a routerLink="/upload" class="add-painting-btn">
+              + Add New Painting
+            </a>
+          </div>
+
+          <div *ngIf="userPaintings.length === 0" class="empty-state">
+            <p>You haven't uploaded any paintings yet.</p>
+            <a routerLink="/upload" class="upload-first-btn"
+              >Upload Your First Painting</a
+            >
+          </div>
+
+          <div *ngIf="userPaintings.length > 0" class="paintings-grid">
+            <div *ngFor="let painting of userPaintings" class="painting-card">
+              <div class="painting-image">
+                <img [src]="painting.image" [alt]="painting.title" />
+                <div class="painting-overlay">
+                  <a
+                    [routerLink]="['/paintings', painting._id]"
+                    class="view-btn"
+                  >
+                    View Details
+                  </a>
+                </div>
+              </div>
+
+              <div class="painting-info">
+                <div class="display-mode">
+                  <h3>{{ painting.title }}</h3>
+
+                  <div class="painting-meta">
+                    <span class="category">
+                      {{
+                        painting.category === "digital"
+                          ? "Digital Art"
+                          : "Canvas/Traditional"
+                      }}
+                    </span>
+                    <span class="dimensions">
+                      {{ painting.dimensions.width }}×{{
+                        painting.dimensions.height
+                      }}{{ painting.dimensions.unit }}
+                    </span>
+                  </div>
+
+                  <div class="rating-info">
+                    <div class="stars">
+                      <fa-icon
+                        *ngFor="
+                          let star of getStarArray(painting.averageRating)
+                        "
+                        [icon]="star ? faStar : starOutline"
+                      ></fa-icon>
+                    </div>
+                    <span class="rating-text">
+                      {{ painting.averageRating | number : "1.1-1" }}/5 ({{
+                        painting.ratingCount
+                      }}
+                      {{ painting.ratingCount === 1 ? "rating" : "ratings" }})
+                    </span>
+                  </div>
+
+                  <p class="description">{{ painting.description }}</p>
+
+                  <div class="stats">
+                    <span>{{ painting.commentCount }} comments</span>
+                    <span>•</span>
+                    <span>Created {{ formatDate(painting.createdAt) }}</span>
+                  </div>
+
+                  <div class="painting-actions">
+                    <button
+                      class="edit-painting-btn"
+                      (click)="editPainting(painting._id)"
+                    >
+                      <fa-icon [icon]="faEdit"></fa-icon>
+                      Edit
+                    </button>
+                    <button
+                      class="delete-painting-btn"
+                      (click)="confirmDeletePainting(painting._id)"
+                    >
+                      <fa-icon [icon]="faTrash"></fa-icon>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="courses-section">
+          <div class="section-header">
+            <h2>My Courses</h2>
+            <a routerLink="/courses" class="browse-courses-btn">
+              Browse Courses
+            </a>
+          </div>
+
+          <div *ngIf="coursesLoading" class="loading-container">
+            <p>Loading your courses...</p>
+          </div>
+
+          <div
+            *ngIf="!coursesLoading && userCourses.length === 0"
+            class="empty-state"
+          >
+            <p>You haven't enrolled in any courses yet.</p>
+            <a routerLink="/courses" class="browse-first-btn"
+              >Explore Available Courses</a
+            >
+          </div>
+
+          <div
+            *ngIf="!coursesLoading && userCourses.length > 0"
+            class="courses-list"
+          >
+            <div *ngFor="let course of userCourses" class="course-card">
+              <div class="course-header">
+                <h3>{{ course.courseName || course.title }}</h3>
+                <span
+                  class="status-badge"
+                  [style.background-color]="getCourseStatusColor(course.status)"
+                >
+                  {{ course.status | titlecase }}
+                </span>
+              </div>
+
+              <div class="course-info">
+                <p class="instructor">
+                  Instructor: {{ course.instructor || course.teacherName }}
+                </p>
+                <p class="schedule">{{ course.formattedSchedule }}</p>
+                <p class="duration">
+                  {{ formatDate(course.startDate) }} -
+                  {{ formatDate(course.endDate) }}
+                </p>
+                <p class="course-details">
+                  {{ course.duration.weeks }} weeks •
+                  {{ course.duration.totalHours }} total hours
+                </p>
+                <p class="category" *ngIf="course.category">
+                  Category: {{ course.category | titlecase }}
+                </p>
+                <p class="level" *ngIf="course.level">
+                  Level: {{ course.level | titlecase }}
+                </p>
+              </div>
+
+              <div class="progress-section" *ngIf="course.status === 'active'">
+                <div class="progress-header">
+                  <span>Progress</span>
+                  <span>{{ course.progress }}%</span>
+                </div>
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    [style.width.%]="course.progress"
+                    [style.background-color]="getProgressColor(course.progress)"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="course-actions">
+                <button
+                  class="course-action-btn"
+                  *ngIf="course.status === 'active'"
+                  [routerLink]="['/courses', course._id]"
+                >
+                  Continue Learning
+                </button>
+                <button
+                  class="course-action-btn secondary"
+                  *ngIf="course.status === 'completed'"
+                  [routerLink]="['/courses', course._id]"
+                >
+                  Review Materials
+                </button>
+                <button
+                  class="course-action-btn"
+                  *ngIf="course.status === 'upcoming'"
+                  [routerLink]="['/courses', course._id]"
+                >
+                  View Details
+                </button>
+                <button
+                  class="course-action-btn secondary"
+                  *ngIf="course.status === 'dropped'"
+                  [routerLink]="['/courses', course._id]"
+                >
+                  View Course
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showDeleteConfirm" class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Confirm Delete</h3>
+      <p>
+        Are you sure you want to delete this painting? This action cannot be
+        undone.
+      </p>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="cancelDelete()">Cancel</button>
+        <button class="delete-btn" (click)="deletePainting()">Delete</button>
+      </div>
+    </div>
+  </div>
+</main>
