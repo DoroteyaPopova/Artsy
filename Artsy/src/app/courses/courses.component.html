@@ -1,0 +1,269 @@
+<main>
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <fa-icon [icon]="faGraduationCap"></fa-icon>
+        Art Courses
+      </h1>
+      <p>Learn from experienced artists and expand your creative skills</p>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="success-message">
+    {{ success }}
+  </div>
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label for="categoryFilter">
+          <fa-icon [icon]="faFilter"></fa-icon>
+          Category:
+        </label>
+        <select
+          id="categoryFilter"
+          [(ngModel)]="selectedCategory"
+          (change)="onCategoryChange()"
+        >
+          <option *ngFor="let category of categories" [value]="category.value">
+            {{ category.label }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="levelFilter">
+          <fa-icon [icon]="faGraduationCap"></fa-icon>
+          Level:
+        </label>
+        <select
+          id="levelFilter"
+          [(ngModel)]="selectedLevel"
+          (change)="onLevelChange()"
+        >
+          <option *ngFor="let level of levels" [value]="level.value">
+            {{ level.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sortFilter">Sort by:</label>
+        <select id="sortFilter" [(ngModel)]="sortBy" (change)="onSortChange()">
+          <option *ngFor="let sort of sortOptions" [value]="sort.value">
+            {{ sort.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="orderFilter">Order:</label>
+        <select
+          id="orderFilter"
+          [(ngModel)]="sortOrder"
+          (change)="onSortChange()"
+        >
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+
+      <button
+        class="refresh-btn"
+        (click)="refreshCourses()"
+        [disabled]="loading"
+      >
+        <fa-icon [icon]="faRefresh" [class.spin]="loading"></fa-icon>
+        Refresh
+      </button>
+    </div>
+
+    <div class="search-row">
+      <div class="search-group">
+        <label for="search">
+          <fa-icon [icon]="faSearch"></fa-icon>
+          Search:
+        </label>
+        <input
+          type="text"
+          id="search"
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+          placeholder="Search courses, instructors, or tags..."
+        />
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <fa-icon [icon]="faRefresh" class="spin"></fa-icon>
+    <p>Loading courses...</p>
+  </div>
+
+  <div *ngIf="!loading && filteredCourses.length === 0" class="no-courses">
+    <fa-icon [icon]="faGraduationCap"></fa-icon>
+    <h3>No courses found</h3>
+    <p
+      *ngIf="
+        searchTerm || selectedCategory !== 'all' || selectedLevel !== 'all'
+      "
+    >
+      Try adjusting your filters or search terms.
+    </p>
+    <p
+      *ngIf="
+        !searchTerm && selectedCategory === 'all' && selectedLevel === 'all'
+      "
+    >
+      No courses are currently available.
+    </p>
+  </div>
+
+  <section *ngIf="!loading && filteredCourses.length > 0" class="courses-grid">
+    <div *ngFor="let course of filteredCourses" class="course-card">
+      <div class="course-image">
+        <img
+          [src]="course.image || '/images/default-course.jpg'"
+          [alt]="course.title"
+          onerror="this.src='/images/default-course.jpg'"
+        />
+        <div class="course-overlay">
+          <div class="course-level">{{ getLevelLabel(course.level) }}</div>
+          <div class="course-category">
+            {{ getCategoryLabel(course.category) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="course-content">
+        <div class="course-header">
+          <h3>{{ course.title }}</h3>
+        </div>
+        <p class="course-description">{{ course.description }}</p>
+
+        <div class="course-details">
+          <div class="detail-item">
+            <fa-icon [icon]="faUsers"></fa-icon>
+            <span>Instructor: {{ course.teacherName }}</span>
+          </div>
+
+          <div class="detail-item">
+            <fa-icon [icon]="faClock"></fa-icon>
+            <span>{{ formatDuration(course.duration) }}</span>
+          </div>
+
+          <div class="detail-item">
+            <fa-icon [icon]="faCalendar"></fa-icon>
+            <span>{{ formatSchedule(course.schedule) }}</span>
+          </div>
+
+          <div class="detail-item">
+            <fa-icon [icon]="faCalendar"></fa-icon>
+            <span
+              >{{ formatDate(course.startDate) }} -
+              {{ formatDate(course.endDate) }}</span
+            >
+          </div>
+
+          <div class="detail-item">
+            <fa-icon [icon]="faUsers"></fa-icon>
+            <span
+              >{{ course.currentStudents }}/{{
+                course.maxStudents
+              }}
+              students</span
+            >
+          </div>
+
+          <div class="detail-item" *ngIf="course.requirements">
+            <strong>Requirements:</strong> {{ course.requirements }}
+          </div>
+
+          <div class="detail-item" *ngIf="course.materials">
+            <strong>Materials:</strong> {{ course.materials }}
+          </div>
+        </div>
+
+        <div class="course-tags" *ngIf="course.tags && course.tags.length > 0">
+          <span *ngFor="let tag of course.tags" class="tag">{{ tag }}</span>
+        </div>
+      </div>
+
+      <div class="course-footer">
+        <div class="course-price">
+          <span class="price">{{ formatPrice(course.cost) }}</span>
+        </div>
+
+        <div class="course-actions">
+          <div class="enrollment-status">
+            <span
+              class="status-badge"
+              [class.full]="isCourseFull(course)"
+              [class.available]="!isCourseFull(course)"
+            >
+              {{ getEnrollmentStatus(course) }}
+            </span>
+          </div>
+
+          <div class="action-buttons">
+            <button
+              class="enroll-btn"
+              *ngIf="canEnroll(course)"
+              (click)="enrollInCourse(course._id)"
+            >
+              <fa-icon [icon]="faGraduationCap"></fa-icon>
+              Enroll Now
+            </button>
+
+            <button class="view-btn" [routerLink]="['/courses', course._id]">
+              <fa-icon [icon]="faSearch"></fa-icon>
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div *ngIf="!loading && totalPages > 1" class="pagination">
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage <= 1">
+      Previous
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        class="page-number"
+        [class.active]="currentPage === i + 1"
+        (click)="goToPage(i + 1)"
+      >
+        {{ i + 1 }}
+      </button>
+    </div>
+
+    <button
+      class="page-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage >= totalPages"
+    >
+      Next
+    </button>
+
+    <div class="pagination-info">
+      <span>Page {{ currentPage }} of {{ totalPages }}</span>
+    </div>
+  </div>
+
+  <app-confirmation-modal
+    [isVisible]="showLoginModal"
+    [title]="'Login'"
+    [message]="'Please log in to enroll in courses'"
+    [confirmText]="'Login'"
+    [type]="'warning'"
+    (confirmed)="onLoginConfirmed()"
+    (cancelled)="onLoginCancelled()"
+  >
+  </app-confirmation-modal>
+</main>
