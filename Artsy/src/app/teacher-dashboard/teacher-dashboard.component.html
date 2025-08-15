@@ -1,0 +1,225 @@
+<main class="teacher-dashboard">
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>
+        <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+        Teacher Dashboard
+      </h1>
+      <p *ngIf="currentUser && !loading">
+        Welcome back, {{ currentUser.username }}!
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="success-message">
+    {{ success }}
+  </div>
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <fa-icon [icon]="faRefresh" class="spin"></fa-icon>
+    <p>Loading your dashboard...</p>
+  </div>
+
+  <div *ngIf="!loading" class="dashboard-content">
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-icon">
+          <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.totalCourses }}</h3>
+          <p>Total Courses</p>
+        </div>
+      </div>
+
+      <div class="stat-card active">
+        <div class="stat-icon">
+          <fa-icon [icon]="faCalendar"></fa-icon>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.activeCourses }}</h3>
+          <p>Active Courses</p>
+        </div>
+      </div>
+
+      <div class="stat-card students">
+        <div class="stat-icon">
+          <fa-icon [icon]="faUsers"></fa-icon>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.totalStudents }}</h3>
+          <p>Total Students</p>
+        </div>
+      </div>
+
+      <div class="stat-card draft">
+        <div class="stat-icon">
+          <fa-icon [icon]="faEdit"></fa-icon>
+        </div>
+        <div class="stat-content">
+          <h3>{{ stats.draftCourses }}</h3>
+          <p>Draft Courses</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="courses-section">
+      <div class="section-header">
+        <h2>My Courses</h2>
+        <div class="header-actions">
+          <button
+            class="refresh-btn"
+            (click)="refreshCourses()"
+            [disabled]="coursesLoading"
+          >
+            <fa-icon [icon]="faRefresh" [class.spin]="coursesLoading"></fa-icon>
+            {{ coursesLoading ? "Loading..." : "Refresh" }}
+          </button>
+          <button class="create-course-btn-small" (click)="createNewCourse()">
+            <fa-icon [icon]="faPlus"></fa-icon>
+            New Course
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="coursesLoading" class="loading-container">
+        <fa-icon [icon]="faRefresh" class="spin"></fa-icon>
+        <p>Loading your courses...</p>
+      </div>
+
+      <div
+        *ngIf="!coursesLoading && teacherCourses.length === 0"
+        class="empty-state"
+      >
+        <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+        <h3>No courses created yet</h3>
+        <p>Start sharing your knowledge by creating your first course!</p>
+      </div>
+
+      <div
+        *ngIf="!coursesLoading && teacherCourses.length > 0"
+        class="courses-grid"
+      >
+        <div *ngFor="let course of teacherCourses" class="course-card">
+          <div class="course-header">
+            <div class="course-title">
+              <h3>{{ course.title }}</h3>
+              <span
+                class="status-badge"
+                [style.background-color]="getStatusColor(course.status)"
+              >
+                {{ course.status | titlecase }}
+              </span>
+            </div>
+          </div>
+
+          <div class="course-info">
+            <p class="course-description">{{ course.description }}</p>
+
+            <div class="course-details">
+              <div class="detail-item">
+                <fa-icon [icon]="faUsers"></fa-icon>
+                <span
+                  >{{ course.currentStudents || 0 }}/{{
+                    course.maxStudents || 0
+                  }}
+                  students</span
+                >
+              </div>
+
+              <div class="detail-item">
+                <fa-icon [icon]="faClock"></fa-icon>
+                <span>{{ getCourseDuration(course) }}</span>
+              </div>
+
+              <div class="detail-item">
+                <fa-icon [icon]="faDollarSign"></fa-icon>
+                <span>{{ getCoursePrice(course) }}</span>
+              </div>
+
+              <div class="detail-item">
+                <fa-icon [icon]="faCalendar"></fa-icon>
+                <span>{{ formatSchedule(course.schedule) }}</span>
+              </div>
+            </div>
+
+            <div class="course-meta">
+              <span class="category">{{
+                getCategoryLabel(course.category)
+              }}</span>
+              <span class="level">{{ getLevelLabel(course.level) }}</span>
+              <span class="dates">
+                {{ formatDate(course.startDate) }} -
+                {{ formatDate(course.endDate) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="course-actions">
+            <button
+              class="action-btn view-btn"
+              (click)="viewCourse(course._id)"
+              title="View Course"
+            >
+              <fa-icon [icon]="faEye"></fa-icon>
+              View
+            </button>
+
+            <button
+              class="action-btn edit-btn"
+              (click)="editCourse(course._id)"
+              title="Edit Course"
+            >
+              <fa-icon [icon]="faEdit"></fa-icon>
+              Edit
+            </button>
+
+            <button
+              class="action-btn delete-btn"
+              (click)="deleteCourse(course._id)"
+              title="Delete Course"
+              *ngIf="canDeleteCourse(course)"
+              [attr.aria-label]="'Delete course: ' + course.title"
+            >
+              <fa-icon [icon]="faTrash"></fa-icon>
+              Delete
+            </button>
+
+            <div
+              *ngIf="!canDeleteCourse(course)"
+              class="cannot-delete-warning"
+              title="Cannot delete course with enrolled students"
+            >
+              <span class="warning-text">
+                <fa-icon [icon]="faUsers"></fa-icon>
+                Has Students
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-confirmation-modal
+    [isVisible]="showDeleteModal"
+    [title]="'Delete Course'"
+    [message]="
+      'Are you sure you want to delete this course? This action cannot be undone and will permanently remove all course data.'
+    "
+    [courseTitle]="selectedCourse?.title || ''"
+    [confirmText]="'Delete Course'"
+    [loadingText]="'Deleting...'"
+    [type]="'danger'"
+    [loading]="modalLoading"
+    [confirmIcon]="faTrash"
+    [warningNote]="
+      'This will permanently delete all course content, assignments, and associated data.'
+    "
+    (confirmed)="onDeleteConfirmed()"
+    (cancelled)="onDeleteCancelled()"
+  ></app-confirmation-modal>
+</main>
