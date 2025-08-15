@@ -1,0 +1,59 @@
+<main>
+  <section>
+    <h1>Login</h1>
+
+    <div *ngIf="success" class="success-message">
+      {{ success }}
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+
+    <div class="column-login">
+      <label for="email">Email</label>
+      <input
+        type="email"
+        placeholder="Email"
+        id="email"
+        [(ngModel)]="email"
+        name="email"
+        required
+      />
+    </div>
+
+    <div class="column-login">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        placeholder="Password"
+        id="password"
+        [(ngModel)]="password"
+        name="password"
+        required
+      />
+    </div>
+
+    <div class="column-login">
+      <label for="confirmPassword">Confirm Password</label>
+      <input
+        type="password"
+        placeholder="Confirm Password"
+        id="confirmPassword"
+        [(ngModel)]="confirmPassword"
+        name="confirmPassword"
+        required
+      />
+    </div>
+
+    <button type="button" (click)="onLogin()" [disabled]="loading">
+      <span *ngIf="loading">Logging in...</span>
+      <span *ngIf="!loading">Log In</span>
+    </button>
+
+    <p>
+      Don't have an account?
+      <a routerLink="/register">Register here</a>
+    </p>
+  </section>
+</main>
