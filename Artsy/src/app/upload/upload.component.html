@@ -1,0 +1,199 @@
+<main>
+  <div class="upload-container">
+    <div class="upload-header">
+      <h1>Upload New Painting</h1>
+      <p>Share your artistic creation with the world</p>
+    </div>
+
+    <div *ngIf="success" class="success-message">
+      {{ success }}
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+
+    <div class="upload-content">
+      <div class="form-section">
+        <form (ngSubmit)="onSubmit()" #uploadForm="ngForm">
+          <div class="form-group">
+            <label for="title">Title *</label>
+            <input
+              type="text"
+              id="title"
+              [(ngModel)]="formData.title"
+              name="title"
+              placeholder="Enter painting title"
+              maxlength="100"
+              required
+              [class.error]="formErrors.title"
+            />
+            <div *ngIf="formErrors.title" class="field-error">
+              {{ formErrors.title }}
+            </div>
+            <div class="char-count">{{ formData.title.length }}/100</div>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Category *</label>
+            <select
+              id="category"
+              [(ngModel)]="formData.category"
+              name="category"
+              required
+            >
+              <option value="digital">Digital Art</option>
+              <option value="canvas">Canvas/Traditional</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Dimensions *</label>
+            <div class="dimensions-group">
+              <div class="dimension-input">
+                <input
+                  type="number"
+                  [(ngModel)]="formData.dimensions.width"
+                  name="width"
+                  placeholder="Width"
+                  min="1"
+                  required
+                  [class.error]="formErrors.width"
+                />
+                <span>×</span>
+                <input
+                  type="number"
+                  [(ngModel)]="formData.dimensions.height"
+                  name="height"
+                  placeholder="Height"
+                  min="1"
+                  required
+                  [class.error]="formErrors.height"
+                />
+                <select [(ngModel)]="formData.dimensions.unit" name="unit">
+                  <option value="cm">cm</option>
+                  <option value="inches">inches</option>
+                  <option value="px">px</option>
+                </select>
+              </div>
+              <div
+                *ngIf="formErrors.width || formErrors.height"
+                class="field-error"
+              >
+                {{ formErrors.width || formErrors.height }}
+              </div>
+              <div *ngIf="dimensionsDisplay" class="dimensions-preview">
+                Size: {{ dimensionsDisplay }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="image">Image URL *</label>
+            <input
+              type="url"
+              id="image"
+              [(ngModel)]="formData.image"
+              name="image"
+              placeholder="https://example.com/your-image.jpg"
+              required
+              [class.error]="formErrors.image"
+            />
+            <div *ngIf="formErrors.image" class="field-error">
+              {{ formErrors.image }}
+            </div>
+            <div class="image-help">
+              Upload your image to
+              <a href="https://postimages.org/" target="_blank">PostImage</a>,
+              <a href="https://imgur.com/" target="_blank">Imgur</a>, or similar
+              service and paste the URL here.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description *</label>
+            <textarea
+              id="description"
+              [(ngModel)]="formData.description"
+              name="description"
+              placeholder="Describe your artwork, inspiration, techniques used..."
+              rows="4"
+              minlength="10"
+              maxlength="1000"
+              required
+              [class.error]="formErrors.description"
+            ></textarea>
+            <div *ngIf="formErrors.description" class="field-error">
+              {{ formErrors.description }}
+            </div>
+            <div class="char-count">{{ formData.description.length }}/1000</div>
+          </div>
+
+          <div class="form-group">
+            <label for="tags">Tags (Optional)</label>
+            <input
+              type="text"
+              id="tags"
+              [(ngModel)]="tagsInput"
+              name="tags"
+              placeholder="landscape, oil painting, abstract (separate with commas)"
+            />
+            <div class="tags-help">
+              Add relevant tags separated by commas to help others discover your
+              art
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="cancel-btn" routerLink="/gallery">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="submit-btn"
+              [disabled]="loading || !isFormValid"
+            >
+              <span *ngIf="loading">Uploading...</span>
+              <span *ngIf="!loading">Upload Painting</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="preview-section">
+        <h3>Preview</h3>
+        <div class="preview-card">
+          <div class="preview-image" *ngIf="previewImage()">
+            <img [src]="formData.image" [alt]="formData.title || 'Preview'" />
+          </div>
+          <div class="preview-placeholder" *ngIf="!previewImage()">
+            <p>Image preview will appear here</p>
+          </div>
+
+          <div class="preview-info">
+            <h4>{{ formData.title || "Your Painting Title" }}</h4>
+            <p class="preview-author">
+              by {{ currentUser?.username || "Loading..." }}
+            </p>
+            <p class="preview-category" *ngIf="formData.category">
+              {{
+                formData.category === "digital"
+                  ? "Digital Art"
+                  : "Canvas/Traditional"
+              }}
+            </p>
+            <p class="preview-dimensions" *ngIf="dimensionsDisplay">
+              {{ dimensionsDisplay }}
+            </p>
+            <p class="preview-description">
+              {{
+                formData.description ||
+                  "Your artwork description will appear here..."
+              }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
