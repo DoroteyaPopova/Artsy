@@ -1,0 +1,44 @@
+<div
+  class="modal-overlay"
+  [class.show]="isVisible"
+  (click)="onOverlayClick($event)"
+>
+  <div class="modal-dialog" [class.show]="isVisible">
+    <div class="modal-header">
+      <div class="warning-icon">
+        <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+      </div>
+      <h3>{{ title || "Confirm Action" }}</h3>
+      <button class="close-btn" (click)="onCancel()">
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p [innerHTML]="message"></p>
+      <div class="course-info" *ngIf="courseTitle">
+        <strong>"{{ courseTitle }}"</strong>
+      </div>
+      <div class="warning-note" *ngIf="warningNote">
+        <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+        {{ warningNote }}
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-cancel" (click)="onCancel()">Cancel</button>
+      <button
+        class="btn btn-confirm"
+        [class.btn-danger]="type === 'danger'"
+        [class.btn-warning]="type === 'warning'"
+        [class.btn-info]="type === 'info'"
+        [disabled]="loading"
+        (click)="onConfirm()"
+      >
+        <fa-icon [icon]="confirmIcon" *ngIf="confirmIcon && !loading"></fa-icon>
+        <span class="loading-spinner" *ngIf="loading"></span>
+        {{ loading ? loadingText : confirmText }}
+      </button>
+    </div>
+  </div>
+</div>
