@@ -1,0 +1,123 @@
+<main>
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>About Artsy</h1>
+      <p class="hero-subtitle">
+        Empowering artists to share, learn, and grow together in a supportive
+        creative community.
+      </p>
+    </div>
+  </section>
+
+  <section class="mission-section">
+    <div class="mission-content">
+      <h2>Our Mission</h2>
+      <p>
+        At Artsy, we believe that art has the power to connect people, inspire
+        creativity, and transform lives. Our platform provides artists of all
+        skill levels with the tools and community they need to showcase their
+        work, learn new techniques, and connect with fellow creators around the
+        world.
+      </p>
+      <p>
+        Whether you're a beginner picking up a brush for the first time or a
+        seasoned professional looking to expand your horizons, Artsy is your
+        gateway to a world of artistic possibilities.
+      </p>
+    </div>
+  </section>
+
+  <section class="features-section">
+    <h2>What We Offer</h2>
+    <div class="features-grid">
+      <div *ngFor="let feature of features" class="feature-card">
+        <div class="feature-icon">
+          <fa-icon [icon]="feature.icon"></fa-icon>
+        </div>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="team-section">
+    <h2>Meet Our Team</h2>
+    <div class="team-grid">
+      <div *ngFor="let member of teamMembers" class="team-member">
+        <div class="member-avatar">
+          <fa-icon [icon]="faPaintBrush"></fa-icon>
+        </div>
+        <div class="member-info">
+          <h3>{{ member.name }}</h3>
+          <p class="member-role">{{ member.role }}</p>
+          <p class="member-description">{{ member.description }}</p>
+          <div class="member-specialties">
+            <span
+              *ngFor="let specialty of member.specialties"
+              class="specialty-tag"
+            >
+              {{ specialty }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to Join Our Community?</h2>
+      <div class="cta-split">
+        <div class="cta-left">
+          <div class="cta-content-wrapper">
+            <h3>New to Artsy?</h3>
+            <p>
+              Start your artistic journey with us today. Share your art, take
+              courses, and connect with fellow creators.
+            </p>
+          </div>
+          <div class="cta-button-wrapper">
+            <a routerLink="/register" class="cta-btn primary">Get Started</a>
+          </div>
+        </div>
+
+        <div class="cta-right">
+          <div class="cta-content-wrapper">
+            <h3>Already a Member?</h3>
+            <p>
+              Ready to share your expertise? Become an instructor and help
+              others discover their artistic potential by creating your own
+              courses.
+            </p>
+          </div>
+          <div class="cta-button-wrapper">
+            <a routerLink="/become-teacher" class="cta-btn secondary"
+              >Become a Teacher</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section">
+    <h2>Get in Touch</h2>
+    <div class="contact-content">
+      <div class="contact-info">
+        <div class="contact-item">
+          <fa-icon [icon]="faEnvelope"></fa-icon>
+          <span>hello&#64;artsy.com</span>
+        </div>
+        <div class="contact-item">
+          <fa-icon [icon]="faMapMarkerAlt"></fa-icon>
+          <span>Varna, Bulgaria</span>
+        </div>
+      </div>
+      <p>
+        Have questions, suggestions, or just want to say hello? We'd love to
+        hear from you! Our team is always ready to help and support our amazing
+        community of artists.
+      </p>
+    </div>
+  </section>
+</main>
