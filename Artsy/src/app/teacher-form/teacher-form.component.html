@@ -1,0 +1,98 @@
+<main>
+  <div *ngIf="loading" class="loading-container">
+    <p>Loading your information...</p>
+  </div>
+
+  <section *ngIf="!loading">
+    <h1>Become a Teacher</h1>
+
+    <div *ngIf="success" class="success-message">
+      {{ success }}
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #teacherForm="ngForm">
+      <div class="column-login">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="formData.username"
+          name="username"
+          readonly
+          class="readonly-field"
+        />
+      </div>
+
+      <div class="column-login">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="formData.email"
+          name="email"
+          readonly
+          class="readonly-field"
+        />
+      </div>
+
+      <div class="column-login">
+        <label>Your Specialties (at least 1 required)</label>
+        <div class="specialties-container">
+          <input
+            type="text"
+            placeholder="e.g., Digital Art"
+            [(ngModel)]="formData.specialties[0]"
+            name="specialty1"
+            maxlength="50"
+          />
+          <input
+            type="text"
+            placeholder="e.g., Oil Painting"
+            [(ngModel)]="formData.specialties[1]"
+            name="specialty2"
+            maxlength="50"
+          />
+          <input
+            type="text"
+            placeholder="e.g., Watercolor"
+            [(ngModel)]="formData.specialties[2]"
+            name="specialty3"
+            maxlength="50"
+          />
+        </div>
+        <small class="field-help">
+          {{ getFilledSpecialtiesCount() }}/3 specialties filled
+        </small>
+      </div>
+
+      <div class="column-login">
+        <label for="bio">Teacher Bio (one sentence)</label>
+        <textarea
+          id="bio"
+          [(ngModel)]="formData.bio"
+          name="bio"
+          placeholder="e.g., Passionate about fostering creativity and building supportive art communities."
+          rows="3"
+          maxlength="200"
+          required
+        ></textarea>
+        <small class="field-help">
+          {{ formData.bio.length }}/200 characters
+        </small>
+      </div>
+
+      <button type="submit" [disabled]="submitting || !isFormValid()">
+        <span *ngIf="submitting">Submitting Application...</span>
+        <span *ngIf="!submitting">Submit Teacher Application</span>
+      </button>
+
+      <div class="back-link">
+        <a (click)="goBack()" style="cursor: pointer">← Back to About</a>
+      </div>
+    </form>
+  </section>
+</main>
