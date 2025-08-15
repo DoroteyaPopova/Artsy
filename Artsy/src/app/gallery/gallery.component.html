@@ -1,0 +1,100 @@
+<main>
+  <div *ngIf="loading" class="loading-container">
+    <p>Loading paintings...</p>
+  </div>
+
+  <div *ngIf="error" class="error-container">
+    <p>{{ error }}</p>
+    <button (click)="refreshPaintings()">Try Again</button>
+  </div>
+
+  <section *ngIf="!loading && !error">
+    <div class="filter-section">
+      <div class="dropdown">
+        <button class="dropdown-button" (click)="toggleDropdown()">
+          {{ getSelectedCategoryLabel() }}
+          <span>▼</span>
+        </button>
+        <div class="dropdown-content" [class.show]="showDropdown">
+          <button
+            [class.active]="selectedCategory === 'all'"
+            (click)="selectCategory('all')"
+          >
+            All Categories
+          </button>
+          <button
+            [class.active]="selectedCategory === 'digital'"
+            (click)="selectCategory('digital')"
+          >
+            Digital Art
+          </button>
+          <button
+            [class.active]="selectedCategory === 'canvas'"
+            (click)="selectCategory('canvas')"
+          >
+            Canvas/Traditional
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="paintings.length === 0" class="no-paintings">
+      <p>No paintings found. Be the first to upload!</p>
+      <a routerLink="/upload" *ngIf="isUserLoggedIn()">Upload a Painting</a>
+    </div>
+
+    <div class="paintings-grid" *ngIf="paintings.length > 0">
+      <div class="single-pic" *ngFor="let painting of paintings">
+        <div class="pic-container">
+          <img [src]="painting.image" [alt]="painting.title" />
+        </div>
+
+        <div class="rating">
+          <ng-container
+            *ngFor="
+              let star of getStarRating(painting.averageRating);
+              let i = index
+            "
+          >
+            <fa-icon
+              [icon]="star === 1 ? solidStarIcon : starIcon"
+              [style.opacity]="star === 0.5 ? '0.5' : '1'"
+            >
+            </fa-icon>
+          </ng-container>
+          <span class="rating-text" *ngIf="painting.averageRating">
+            ({{ painting.averageRating | number : "1.1-1" }})
+          </span>
+        </div>
+
+        <h2>{{ painting.title }}</h2>
+
+        <p class="author" *ngIf="painting.author">by {{ painting.author }}</p>
+
+        <p class="category" *ngIf="painting.category">
+          {{
+            painting.category === "digital"
+              ? "Digital Art"
+              : "Canvas/Traditional"
+          }}
+        </p>
+
+        <a [routerLink]="['/paintings', painting._id]">Read More</a>
+      </div>
+    </div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="loadPaintings()" [disabled]="currentPage <= 1">
+        Previous
+      </button>
+
+      <span>
+        Page {{ currentPage }} of {{ totalPages }} ({{ totalPaintings }} total)
+      </span>
+
+      <button (click)="loadPaintings()" [disabled]="currentPage >= totalPages">
+        Next
+      </button>
+    </div>
+  </section>
+</main>
