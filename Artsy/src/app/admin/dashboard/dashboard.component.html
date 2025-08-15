@@ -1,0 +1,214 @@
+<div class="dashboard-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Dashboard Overview</h1>
+      <p>Welcome to the Artsy Admin Panel</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="refreshData()" [disabled]="loading">
+        <fa-icon [icon]="loading ? faClock : faArrowUp"></fa-icon>
+        {{ loading ? "Loading..." : "Refresh" }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner">
+      <fa-icon [icon]="faClock" class="spin"></fa-icon>
+    </div>
+    <p>Loading dashboard data...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="error-container">
+    <p>{{ error }}</p>
+    <button (click)="refreshData()">Try Again</button>
+  </div>
+
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <div class="stats-grid">
+      <div
+        *ngFor="let card of statsCards"
+        class="stat-card"
+        [class]="'stat-card-' + card.color"
+      >
+        <div class="stat-header">
+          <div class="stat-icon">
+            <fa-icon [icon]="card.icon"></fa-icon>
+          </div>
+          <div class="stat-change" [class]="'change-' + card.changeType">
+            <fa-icon
+              [icon]="card.changeType === 'positive' ? faArrowUp : faArrowDown"
+            ></fa-icon>
+            {{ card.change }}
+          </div>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ card.value }}</h3>
+          <p class="stat-title">{{ card.title }}</p>
+        </div>
+        <div class="stat-footer">
+          <a [routerLink]="card.route" class="stat-link">
+            View All
+            <fa-icon [icon]="faEye"></fa-icon>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <div class="content-card">
+        <div class="card-header">
+          <h2>
+            <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+            Recent Teacher Applications
+          </h2>
+          <a routerLink="/admin/teacher-applications" class="view-all-link"
+            >View All</a
+          >
+        </div>
+        <div class="card-content">
+          <div
+            *ngIf="stats.recentApplications.length === 0"
+            class="empty-state"
+          >
+            <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+            <p>No teacher applications yet</p>
+          </div>
+          <div
+            *ngIf="stats.recentApplications.length > 0"
+            class="applications-list"
+          >
+            <div
+              *ngFor="let application of stats.recentApplications"
+              class="application-item"
+            >
+              <div class="application-info">
+                <h4>{{ application.username }}</h4>
+                <p class="application-email">{{ application.email }}</p>
+                <div class="application-specialties">
+                  <span
+                    *ngFor="let specialty of application.specialties"
+                    class="specialty-tag"
+                  >
+                    {{ specialty }}
+                  </span>
+                </div>
+              </div>
+              <div class="application-status">
+                <span
+                  class="status-badge"
+                  [style.background-color]="getStatusColor(application.status)"
+                >
+                  {{ application.status | titlecase }}
+                </span>
+                <small class="application-date">
+                  {{ formatDate(application.applicationDate) }}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header">
+          <h2>
+            <fa-icon [icon]="faUsers"></fa-icon>
+            Recent Users
+          </h2>
+          <a routerLink="/admin/users" class="view-all-link">View All</a>
+        </div>
+        <div class="card-content">
+          <div *ngIf="stats.recentUsers.length === 0" class="empty-state">
+            <fa-icon [icon]="faUsers"></fa-icon>
+            <p>No users found</p>
+          </div>
+          <div *ngIf="stats.recentUsers.length > 0" class="users-list">
+            <div *ngFor="let user of stats.recentUsers" class="user-item">
+              <div class="user-avatar">
+                <fa-icon [icon]="faUsers"></fa-icon>
+              </div>
+              <div class="user-info">
+                <h4>{{ user.username }}</h4>
+                <p>{{ user.email }}</p>
+              </div>
+              <div class="user-meta">
+                <small>{{ formatDate(user.createdAt || user._id) }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header">
+          <h2>
+            <fa-icon [icon]="faPaintBrush"></fa-icon>
+            Recent Paintings
+          </h2>
+          <a routerLink="/admin/paintings" class="view-all-link">View All</a>
+        </div>
+        <div class="card-content">
+          <div *ngIf="stats.recentPaintings.length === 0" class="empty-state">
+            <fa-icon [icon]="faPaintBrush"></fa-icon>
+            <p>No paintings uploaded yet</p>
+          </div>
+          <div *ngIf="stats.recentPaintings.length > 0" class="paintings-list">
+            <div
+              *ngFor="let painting of stats.recentPaintings"
+              class="painting-item"
+            >
+              <div class="painting-image">
+                <img [src]="painting.image" [alt]="painting.title" />
+              </div>
+              <div class="painting-info">
+                <h4>{{ painting.title }}</h4>
+                <p>by {{ painting.author }}</p>
+                <div class="painting-stats">
+                  <span class="rating">
+                    ⭐ {{ painting.averageRating | number : "1.1-1" }} ({{
+                      painting.ratingCount
+                    }})
+                  </span>
+                  <span class="comments"> 💬 {{ painting.commentCount }} </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Quick Actions</h2>
+        </div>
+        <div class="card-content">
+          <div class="quick-actions">
+            <a
+              routerLink="/admin/teacher-applications"
+              class="action-btn primary"
+            >
+              <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+              <span>Review Teacher Applications</span>
+              <div class="action-badge" *ngIf="stats.pendingTeachers > 0">
+                {{ stats.pendingTeachers }}
+              </div>
+            </a>
+            <a routerLink="/admin/users" class="action-btn secondary">
+              <fa-icon [icon]="faUsers"></fa-icon>
+              <span>Manage Users</span>
+            </a>
+            <a routerLink="/admin/paintings" class="action-btn secondary">
+              <fa-icon [icon]="faPaintBrush"></fa-icon>
+              <span>Moderate Paintings</span>
+            </a>
+            <a routerLink="/admin/comments" class="action-btn secondary">
+              <fa-icon [icon]="faComments"></fa-icon>
+              <span>Review Comments</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
