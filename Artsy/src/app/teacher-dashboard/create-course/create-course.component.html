@@ -1,0 +1,402 @@
+<main>
+  <div *ngIf="loading" class="loading-container">
+    <p>Loading...</p>
+  </div>
+
+  <section *ngIf="!loading">
+    <div class="form-header">
+      <button class="back-btn" (click)="goBack()">
+        <fa-icon [icon]="faArrowLeft"></fa-icon>
+        Back to Dashboard
+      </button>
+      <h1>Create New Course</h1>
+    </div>
+
+    <div *ngIf="success" class="success-message">
+      {{ success }}
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+
+    <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" class="course-form">
+      <div class="form-section">
+        <h2>Basic Information</h2>
+
+        <div class="column-login">
+          <label for="title">Course Title *</label>
+          <input
+            type="text"
+            id="title"
+            formControlName="title"
+            placeholder="Enter course title"
+            [class.error]="title?.invalid && title?.touched"
+          />
+          <div *ngIf="title?.invalid && title?.touched" class="field-error">
+            <div *ngIf="title?.errors?.['required']">Title is required</div>
+            <div *ngIf="title?.errors?.['maxlength']">
+              Title cannot exceed 100 characters
+            </div>
+          </div>
+        </div>
+
+        <div class="column-login">
+          <label for="description">Course Description *</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            placeholder="Describe your course, what students will learn, teaching approach..."
+            rows="4"
+            [class.error]="description?.invalid && description?.touched"
+          ></textarea>
+          <small class="char-count"
+            >{{ description?.value?.length || 0 }}/1000 characters</small
+          >
+          <div
+            *ngIf="description?.invalid && description?.touched"
+            class="field-error"
+          >
+            <div *ngIf="description?.errors?.['required']">
+              Description is required
+            </div>
+            <div *ngIf="description?.errors?.['minlength']">
+              Description must be at least 20 characters
+            </div>
+            <div *ngIf="description?.errors?.['maxlength']">
+              Description cannot exceed 1000 characters
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="column-login">
+            <label for="category">Category *</label>
+            <select id="category" formControlName="category">
+              <option *ngFor="let cat of categories" [value]="cat.value">
+                {{ cat.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="column-login">
+            <label for="level">Level *</label>
+            <select id="level" formControlName="level">
+              <option *ngFor="let lvl of levels" [value]="lvl.value">
+                {{ lvl.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="column-login">
+          <label for="image">Course Image URL (Optional)</label>
+          <input
+            type="url"
+            id="image"
+            formControlName="image"
+            placeholder="https://example.com/course-image.jpg"
+          />
+          <small class="field-help">Add a banner image for your course</small>
+        </div>
+      </div>
+
+      <div class="form-section" formGroupName="duration">
+        <h2>Duration</h2>
+
+        <div class="form-row">
+          <div class="column-login">
+            <label for="weeks">Duration (Weeks) *</label>
+            <input
+              type="number"
+              id="weeks"
+              formControlName="weeks"
+              min="1"
+              max="52"
+              [class.error]="weeks?.invalid && weeks?.touched"
+            />
+            <div *ngIf="weeks?.invalid && weeks?.touched" class="field-error">
+              <div *ngIf="weeks?.errors?.['required']">
+                Duration is required
+              </div>
+              <div *ngIf="weeks?.errors?.['min'] || weeks?.errors?.['max']">
+                Duration must be between 1 and 52 weeks
+              </div>
+            </div>
+          </div>
+
+          <div class="column-login">
+            <label for="totalHours">Total Hours *</label>
+            <input
+              type="number"
+              id="totalHours"
+              formControlName="totalHours"
+              min="1"
+              [class.error]="totalHours?.invalid && totalHours?.touched"
+            />
+            <div
+              *ngIf="totalHours?.invalid && totalHours?.touched"
+              class="field-error"
+            >
+              <div *ngIf="totalHours?.errors?.['required']">
+                Total hours is required
+              </div>
+              <div *ngIf="totalHours?.errors?.['min']">
+                Total hours must be at least 1
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" formGroupName="cost">
+        <h2>Cost</h2>
+        <div class="form-row">
+          <div class="column-login">
+            <label for="amount">Course Price *</label>
+            <input
+              type="number"
+              id="amount"
+              formControlName="amount"
+              min="0"
+              step="0.01"
+              [class.error]="amount?.invalid && amount?.touched"
+            />
+            <div *ngIf="amount?.invalid && amount?.touched" class="field-error">
+              <div *ngIf="amount?.errors?.['required']">Price is required</div>
+              <div *ngIf="amount?.errors?.['min']">
+                Price cannot be negative
+              </div>
+            </div>
+          </div>
+
+          <div class="column-login">
+            <label for="currency">Currency *</label>
+            <select id="currency" formControlName="currency">
+              <option *ngFor="let curr of currencies" [value]="curr.value">
+                {{ curr.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" formGroupName="schedule">
+        <h2>Schedule</h2>
+
+        <div class="column-login">
+          <label>Days of Week *</label>
+          <div class="days-selection">
+            <label *ngFor="let day of daysOfWeek" class="day-checkbox">
+              <input
+                type="checkbox"
+                [checked]="isDaySelected(day.value)"
+                (change)="onDayChange(day.value, $event)"
+              />
+              <span>{{ day.label }}</span>
+            </label>
+          </div>
+          <div
+            *ngIf="daysOfWeekControl?.invalid && daysOfWeekControl?.touched"
+            class="field-error"
+          >
+            <div *ngIf="daysOfWeekControl?.errors?.['minLength']">
+              Select at least one day
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="column-login">
+            <label for="startTime">Start Time *</label>
+            <input
+              type="time"
+              id="startTime"
+              formControlName="startTime"
+              [class.error]="startTime?.invalid && startTime?.touched"
+            />
+            <div
+              *ngIf="startTime?.invalid && startTime?.touched"
+              class="field-error"
+            >
+              <div *ngIf="startTime?.errors?.['required']">
+                Start time is required
+              </div>
+              <div *ngIf="startTime?.errors?.['invalidTime']">
+                Please enter a valid time
+              </div>
+            </div>
+          </div>
+
+          <div class="column-login">
+            <label for="endTime">End Time *</label>
+            <input
+              type="time"
+              id="endTime"
+              formControlName="endTime"
+              [class.error]="endTime?.invalid && endTime?.touched"
+            />
+            <div
+              *ngIf="endTime?.invalid && endTime?.touched"
+              class="field-error"
+            >
+              <div *ngIf="endTime?.errors?.['required']">
+                End time is required
+              </div>
+              <div *ngIf="endTime?.errors?.['invalidTime']">
+                Please enter a valid time
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Course Dates</h2>
+
+        <div class="form-row">
+          <div class="column-login">
+            <label for="startDate">Start Date *</label>
+            <input
+              type="date"
+              id="startDate"
+              formControlName="startDate"
+              [class.error]="startDate?.invalid && startDate?.touched"
+            />
+            <div
+              *ngIf="startDate?.invalid && startDate?.touched"
+              class="field-error"
+            >
+              <div *ngIf="startDate?.errors?.['required']">
+                Start date is required
+              </div>
+            </div>
+          </div>
+
+          <div class="column-login">
+            <label for="endDate">End Date *</label>
+            <input
+              type="date"
+              id="endDate"
+              formControlName="endDate"
+              [class.error]="endDate?.invalid && endDate?.touched"
+            />
+            <div
+              *ngIf="endDate?.invalid && endDate?.touched"
+              class="field-error"
+            >
+              <div *ngIf="endDate?.errors?.['required']">
+                End date is required
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="courseForm.errors?.['dateRange'] && startDate?.touched && endDate?.touched"
+          class="field-error"
+        >
+          End date must be after start date
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Capacity & Requirements</h2>
+
+        <div class="column-login">
+          <label for="maxStudents">Maximum Students *</label>
+          <input
+            type="number"
+            id="maxStudents"
+            formControlName="maxStudents"
+            min="1"
+            max="50"
+            [class.error]="maxStudents?.invalid && maxStudents?.touched"
+          />
+          <div
+            *ngIf="maxStudents?.invalid && maxStudents?.touched"
+            class="field-error"
+          >
+            <div *ngIf="maxStudents?.errors?.['required']">
+              Maximum students is required
+            </div>
+            <div
+              *ngIf="maxStudents?.errors?.['min'] || maxStudents?.errors?.['max']"
+            >
+              Must be between 1 and 50 students
+            </div>
+          </div>
+        </div>
+
+        <div class="column-login">
+          <label for="requirements">Prerequisites (Optional)</label>
+          <textarea
+            id="requirements"
+            formControlName="requirements"
+            placeholder="Any prerequisites or requirements for students..."
+            rows="3"
+          ></textarea>
+          <small class="char-count"
+            >{{ requirements?.value?.length || 0 }}/500 characters</small
+          >
+        </div>
+
+        <div class="column-login">
+          <label for="materials">Materials Needed (Optional)</label>
+          <textarea
+            id="materials"
+            formControlName="materials"
+            placeholder="List of materials students will need..."
+            rows="3"
+          ></textarea>
+          <small class="char-count"
+            >{{ materials?.value?.length || 0 }}/500 characters</small
+          >
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Tags (Optional)</h2>
+        <div class="tags-section">
+          <div
+            *ngFor="let tag of tagsArray.controls; let i = index"
+            class="tag-input"
+          >
+            <input
+              type="text"
+              [formControlName]="i"
+              placeholder="Enter a tag"
+              maxlength="30"
+            />
+            <button type="button" class="remove-tag-btn" (click)="removeTag(i)">
+              <fa-icon [icon]="faTimes"></fa-icon>
+            </button>
+          </div>
+          <button
+            type="button"
+            class="add-tag-btn"
+            (click)="addTag()"
+            [disabled]="tagsArray.length >= 10"
+          >
+            <fa-icon [icon]="faPlus"></fa-icon>
+            Add Tag
+          </button>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" (click)="goBack()">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="submit-btn"
+          [disabled]="saving || courseForm.invalid"
+        >
+          <span *ngIf="saving">Creating Course...</span>
+          <span *ngIf="!saving">Create Course</span>
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
