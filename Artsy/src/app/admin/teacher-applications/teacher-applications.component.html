@@ -1,0 +1,375 @@
+<div class="applications-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+        Teacher Applications
+      </h1>
+      <p>Review and manage teacher applications</p>
+    </div>
+    <div class="header-actions">
+      <button
+        class="refresh-btn"
+        (click)="refreshApplications()"
+        [disabled]="loading"
+      >
+        <fa-icon [icon]="faRefresh" [class.spin]="loading"></fa-icon>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="success" class="success-message">
+    {{ success }}
+  </div>
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-icon">
+        <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+      </div>
+      <div class="stat-content">
+        <h3>{{ stats.total }}</h3>
+        <p>Total Applications</p>
+      </div>
+    </div>
+    <div class="stat-card pending">
+      <div class="stat-icon">
+        <fa-icon [icon]="faCalendarAlt"></fa-icon>
+      </div>
+      <div class="stat-content">
+        <h3>{{ stats.pending }}</h3>
+        <p>Pending Review</p>
+      </div>
+    </div>
+    <div class="stat-card approved">
+      <div class="stat-icon">
+        <fa-icon [icon]="faCheck"></fa-icon>
+      </div>
+      <div class="stat-content">
+        <h3>{{ stats.approved }}</h3>
+        <p>Approved</p>
+      </div>
+    </div>
+    <div class="stat-card rejected">
+      <div class="stat-icon">
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </div>
+      <div class="stat-content">
+        <h3>{{ stats.rejected }}</h3>
+        <p>Rejected</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters-section">
+    <div class="filter-group">
+      <label for="statusFilter">
+        <fa-icon [icon]="faFilter"></fa-icon>
+        Filter by Status:
+      </label>
+      <select
+        id="statusFilter"
+        [(ngModel)]="statusFilter"
+        (change)="onStatusFilterChange()"
+      >
+        <option value="all">All Applications</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <div class="search-group">
+      <label for="search">
+        <fa-icon [icon]="faSearch"></fa-icon>
+        Search:
+      </label>
+      <input
+        type="text"
+        id="search"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        placeholder="Search by name, email, or specialty..."
+      />
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <fa-icon [icon]="faRefresh" class="spin"></fa-icon>
+    <p>Loading teacher applications...</p>
+  </div>
+
+  <div *ngIf="!loading" class="applications-section">
+    <div class="section-header">
+      <h2>Applications ({{ filteredApplications.length }})</h2>
+    </div>
+
+    <div *ngIf="filteredApplications.length === 0" class="empty-state">
+      <fa-icon [icon]="faChalkboardTeacher"></fa-icon>
+      <h3>No applications found</h3>
+      <p *ngIf="searchTerm || statusFilter !== 'all'">
+        Try adjusting your filters or search terms.
+      </p>
+      <p *ngIf="!searchTerm && statusFilter === 'all'">
+        No teacher applications have been submitted yet.
+      </p>
+    </div>
+
+    <div *ngIf="filteredApplications.length > 0" class="applications-grid">
+      <div
+        *ngFor="let application of filteredApplications"
+        class="application-card"
+      >
+        <div class="card-header">
+          <div class="user-info">
+            <div class="user-avatar">
+              <fa-icon [icon]="faUser"></fa-icon>
+            </div>
+            <div class="user-details">
+              <h3>{{ application.username }}</h3>
+              <p class="user-email">
+                <fa-icon [icon]="faEnvelope"></fa-icon>
+                {{ application.email }}
+              </p>
+            </div>
+          </div>
+          <div
+            class="status-badge"
+            [style.background-color]="getStatusColor(application.status)"
+          >
+            {{ application.status | titlecase }}
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="specialties">
+            <h4>Specialties:</h4>
+            <div class="specialty-tags">
+              <span
+                *ngFor="let specialty of application.specialties"
+                class="specialty-tag"
+              >
+                {{ specialty }}
+              </span>
+            </div>
+          </div>
+
+          <div class="bio">
+            <h4>Bio:</h4>
+            <p>{{ application.bio }}</p>
+          </div>
+
+          <div class="application-meta">
+            <p class="application-date">
+              <fa-icon [icon]="faCalendarAlt"></fa-icon>
+              Applied: {{ formatDate(application.applicationDate) }}
+            </p>
+            <p *ngIf="application.approvedDate" class="approved-date">
+              <fa-icon [icon]="faCheck"></fa-icon>
+              Approved: {{ formatDate(application.approvedDate) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="view-btn" (click)="viewApplication(application)">
+            <fa-icon [icon]="faEye"></fa-icon>
+            View Details
+          </button>
+
+          <div *ngIf="application.status === 'pending'" class="action-buttons">
+            <button
+              class="approve-btn"
+              (click)="openApprovalModal(application)"
+            >
+              <fa-icon [icon]="faCheck"></fa-icon>
+              Approve
+            </button>
+            <button
+              class="reject-btn"
+              (click)="openRejectionModal(application)"
+            >
+              <fa-icon [icon]="faTimes"></fa-icon>
+              Reject
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showApplicationModal" class="modal-overlay" (click)="closeModal()">
+  <div
+    class="modal-content application-modal"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-header">
+      <h2>Application Details</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </button>
+    </div>
+
+    <div *ngIf="selectedApplication" class="modal-body">
+      <div class="applicant-info">
+        <div class="user-avatar-large">
+          <fa-icon [icon]="faUser"></fa-icon>
+        </div>
+        <div class="applicant-details">
+          <h3>{{ selectedApplication.username }}</h3>
+          <p>{{ selectedApplication.email }}</p>
+          <div
+            class="status-badge"
+            [style.background-color]="
+              getStatusColor(selectedApplication.status)
+            "
+          >
+            {{ selectedApplication.status | titlecase }}
+          </div>
+        </div>
+      </div>
+
+      <div class="application-details">
+        <div class="detail-section">
+          <h4>Specialties</h4>
+          <div class="specialty-tags">
+            <span
+              *ngFor="let specialty of selectedApplication.specialties"
+              class="specialty-tag"
+            >
+              {{ specialty }}
+            </span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Teacher Bio</h4>
+          <p class="bio-text">{{ selectedApplication.bio }}</p>
+        </div>
+
+        <div class="detail-section">
+          <h4>Application Timeline</h4>
+          <div class="timeline">
+            <div class="timeline-item">
+              <strong>Applied:</strong>
+              {{ formatDate(selectedApplication.applicationDate) }}
+            </div>
+            <div *ngIf="selectedApplication.approvedDate" class="timeline-item">
+              <strong>Approved:</strong>
+              {{ formatDate(selectedApplication.approvedDate) }}
+            </div>
+            <div
+              *ngIf="selectedApplication.rejectionReason"
+              class="timeline-item rejection"
+            >
+              <strong>Rejection Reason:</strong>
+              {{ selectedApplication.rejectionReason }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="selectedApplication.status === 'pending'"
+        class="modal-actions"
+      >
+        <button
+          class="approve-btn"
+          (click)="openApprovalModal(selectedApplication)"
+        >
+          <fa-icon [icon]="faCheck"></fa-icon>
+          Approve Application
+        </button>
+        <button
+          class="reject-btn"
+          (click)="openRejectionModal(selectedApplication)"
+        >
+          <fa-icon [icon]="faTimes"></fa-icon>
+          Reject Application
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showApprovalModal" class="modal-overlay" (click)="closeModal()">
+  <div
+    class="modal-content confirmation-modal"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-header">
+      <h2>Approve Teacher Application</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="confirmation-content">
+        <fa-icon [icon]="faCheck" class="confirmation-icon approve"></fa-icon>
+        <h3>Approve {{ selectedApplication?.username }}?</h3>
+        <p>
+          This will grant {{ selectedApplication?.username }} teacher privileges
+          on the platform. They will be able to create and manage courses.
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="closeModal()">Cancel</button>
+      <button
+        class="confirm-btn approve"
+        (click)="approveApplication()"
+        [disabled]="processing"
+      >
+        <fa-icon [icon]="faCheck"></fa-icon>
+        {{ processing ? "Approving..." : "Approve Application" }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showRejectionModal" class="modal-overlay" (click)="closeModal()">
+  <div
+    class="modal-content confirmation-modal"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-header">
+      <h2>Reject Teacher Application</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="confirmation-content">
+        <fa-icon [icon]="faTimes" class="confirmation-icon reject"></fa-icon>
+        <h3>Reject {{ selectedApplication?.username }}'s Application?</h3>
+        <p>Please provide a reason for rejecting this application:</p>
+
+        <textarea
+          [(ngModel)]="rejectionReason"
+          placeholder="Enter reason for rejection..."
+          rows="4"
+          class="rejection-textarea"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="closeModal()">Cancel</button>
+      <button
+        class="confirm-btn reject"
+        (click)="rejectApplication()"
+        [disabled]="processing || !rejectionReason.trim()"
+      >
+        <fa-icon [icon]="faTimes"></fa-icon>
+        {{ processing ? "Rejecting..." : "Reject Application" }}
+      </button>
+    </div>
+  </div>
+</div>
