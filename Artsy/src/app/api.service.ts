@@ -19,7 +19,6 @@ interface Painting {
   owner?: string;
 }
 
-// Updated AuthResponse to handle both success and error cases
 interface AuthResponse {
   message?: string;
   user?: {
@@ -46,7 +45,6 @@ export class ApiService {
     this.isBrowser = isPlatformBrowser(platformId);
   }
 
-  // Helper method to get auth headers
   private getAuthHeaders(): HttpHeaders {
     const token = this.getToken();
     return new HttpHeaders({
@@ -83,7 +81,6 @@ export class ApiService {
       .post<AuthResponse>(`${this.baseUrl}/users/login`, credentials)
       .pipe(
         tap((response) => {
-          // Automatically set auth state on successful login
           if (response.token && response.user) {
             this.authService.setAuthenticationState(
               response.user,
@@ -101,7 +98,6 @@ export class ApiService {
       })
       .pipe(
         tap((response: any) => {
-          // Update user data in auth service
           if (response.user) {
             this.authService.updateUser(response.user);
           }
@@ -112,7 +108,6 @@ export class ApiService {
   logout(): Observable<any> {
     return this.http.get(`${this.baseUrl}/users/logout`).pipe(
       tap(() => {
-        // Clear auth state on logout
         this.authService.clearAuthenticationState();
       })
     );
@@ -143,7 +138,6 @@ export class ApiService {
       })
       .pipe(
         tap((response: any) => {
-          // Update user data in auth service after successful update
           if (response.user) {
             this.authService.updateUser(response.user);
           }
@@ -164,7 +158,6 @@ export class ApiService {
   getPaintings(category?: string): Observable<any> {
     let url = `${this.baseUrl}/paintings/catalog`;
 
-    // Add category filter if provided
     if (category && category !== 'all') {
       url += `?category=${category}`;
     }
@@ -382,7 +375,6 @@ export class ApiService {
   // TOKEN MANAGEMENT METHODS
   // ==========================================
 
-  // Token management - only works in browser
   saveToken(token: string): void {
     if (this.isBrowser) {
       localStorage.setItem('token', token);
@@ -410,7 +402,7 @@ export class ApiService {
   // COURSE METHODS
   // ==========================================
 
-  // Get all courses with filters
+  // Get all courses
   getCourses(filters?: {
     category?: string;
     level?: string;

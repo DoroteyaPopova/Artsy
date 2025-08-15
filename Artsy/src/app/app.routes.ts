@@ -1,4 +1,3 @@
-// src/app/app.routes.ts - COMPLETE FILE WITH ADMIN ROUTES
 import { Routes } from '@angular/router';
 import { NavigationComponent } from './navigation/navigation.component';
 import { HomeComponent } from './home/home.component';
@@ -97,11 +96,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'teacher-applications', component: TeacherApplicationsComponent },
-      // Add more admin routes as you create components:
-      // { path: 'users', component: UsersComponent },
-      // { path: 'paintings', component: PaintingsComponent },
-      // { path: 'comments', component: CommentsComponent },
-      // { path: 'settings', component: SettingsComponent },
     ],
   },
 

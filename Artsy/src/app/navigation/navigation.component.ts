@@ -1,4 +1,3 @@
-// src/app/navigation/navigation.component.ts - UPDATED WITH REACTIVE AUTH
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
@@ -26,7 +25,6 @@ export class NavigationComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Subscribe to authentication state changes
     this.authSubscription.add(
       this.authService.isAuthenticated$.subscribe((isAuth) => {
         this.isLoggedIn = isAuth;
@@ -37,21 +35,18 @@ export class NavigationComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Subscribe to current user changes
     this.authSubscription.add(
       this.authService.currentUser$.subscribe((user) => {
         this.currentUser = user;
       })
     );
 
-    // Initial load if already authenticated
     if (this.authService.isLoggedIn()) {
       this.loadUserProfile();
     }
   }
 
   ngOnDestroy() {
-    // Clean up subscriptions to prevent memory leaks
     this.authSubscription.unsubscribe();
   }
 
