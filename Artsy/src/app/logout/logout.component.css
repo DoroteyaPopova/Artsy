@@ -1,0 +1,145 @@
+main {
+  display: flex;
+  flex-direction: column;
+  -moz-box-align: center;
+  align-items: center;
+  justify-content: center;
+  margin: 0px auto;
+  width: 100%;
+  max-width: 1680px;
+  height: 600px;
+}
+
+section {
+  color: #000000;
+  letter-spacing: 0.5px;
+  outline: none;
+  border: none;
+  background-color: rgba(85, 85, 85, 0.158);
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  width: 500px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  border-radius: 5px;
+}
+
+section h1 {
+  font-size: 3.5rem;
+  font-weight: 500;
+  line-height: 42px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logout-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  width: 100%;
+}
+
+.user-info {
+  text-align: center;
+}
+
+.greeting {
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  color: #222222;
+}
+
+.question {
+  font-size: 1.2rem;
+  color: #222222;
+}
+
+.logout-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.logout-btn {
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.confirm-btn {
+  background-color: #e7dadd;
+  color: black;
+}
+
+.confirm-btn:hover {
+  background-color: #801d1d;
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.confirm-btn:active {
+  background-color: #bd2130;
+}
+
+.cancel-btn {
+  background-color: black;
+  color: white;
+}
+
+.cancel-btn:hover {
+  cursor: pointer;
+  box-shadow: inset 0 0 0 10em rgba(133, 133, 133, 0.3);
+}
+
+.cancel-btn:active {
+  background-color: rgb(43, 40, 40);
+  color: rgb(8, 8, 8);
+}
+
+.logging-out {
+  font-size: 1.3rem;
+  color: #666;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  section {
+    width: 400px;
+    height: 350px;
+  }
+  section h1 {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  section {
+    width: 320px;
+    height: 320px;
+  }
+  section h1 {
+    font-size: 2.5rem;
+  }
+  .greeting {
+    font-size: 1.2rem;
+  }
+  .question {
+    font-size: 1rem;
+  }
+  .logout-actions {
+    flex-direction: column;
+    gap: 15px;
+  }
+  .logout-btn {
+    width: 100%;
+    min-width: auto;
+  }
+}

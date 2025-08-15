@@ -1,0 +1,29 @@
+<main>
+  <section>
+    <h1>Logout</h1>
+
+    <div class="logout-content" *ngIf="isLoggedIn && !loading">
+      <div class="user-info" *ngIf="currentUser">
+        <p class="greeting">
+          Hello, <strong>{{ currentUser.username }}</strong
+          >!
+        </p>
+        <p class="question">Are you sure you want to logout?</p>
+      </div>
+
+      <div class="logout-actions">
+        <button class="logout-btn confirm-btn" (click)="confirmLogout()">
+          Yes, Logout
+        </button>
+
+        <button class="logout-btn cancel-btn" (click)="cancelLogout()">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <div class="logout-content" *ngIf="loading">
+      <p class="logging-out">Logging out...</p>
+    </div>
+  </section>
+</main>
