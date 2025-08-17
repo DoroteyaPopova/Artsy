@@ -235,7 +235,6 @@ export class ProfileComponent implements OnInit {
           formattedSchedule: this.formatCourseSchedule(course.schedule),
         }));
         this.coursesLoading = false;
-        console.log('Loaded courses:', this.userCourses);
       },
       error: (error) => {
         console.error('Error loading user courses:', error);
