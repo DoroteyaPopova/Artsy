@@ -14,7 +14,6 @@ export class LogoutComponent implements OnInit {
   currentUser: any = null;
   loading: boolean = false;
   isLoggedIn: boolean = false;
-  success: string = '';
 
   constructor(private apiService: ApiService, private router: Router) {}
 
@@ -38,7 +37,6 @@ export class LogoutComponent implements OnInit {
 
   confirmLogout() {
     this.loading = true;
-    this.success = '';
 
     this.apiService.logout().subscribe({
       next: () => {},
@@ -46,7 +44,6 @@ export class LogoutComponent implements OnInit {
         console.error('Logout API error:', error);
       },
       complete: () => {
-        this.success = 'Logout successful! Redirecting to Home page...';
         this.loading = false;
 
         setTimeout(() => {
