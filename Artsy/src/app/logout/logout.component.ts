@@ -14,12 +14,12 @@ export class LogoutComponent implements OnInit {
   currentUser: any = null;
   loading: boolean = false;
   isLoggedIn: boolean = false;
+  success: string = '';
 
   constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit() {
-    const token = this.apiService.getToken();
-    if (!token) {
+    if (!this.apiService.isLoggedIn()) {
       this.router.navigate(['/']);
       return;
     }
@@ -38,6 +38,7 @@ export class LogoutComponent implements OnInit {
 
   confirmLogout() {
     this.loading = true;
+    this.success = '';
 
     this.apiService.logout().subscribe({
       next: () => {},
@@ -45,15 +46,12 @@ export class LogoutComponent implements OnInit {
         console.error('Logout API error:', error);
       },
       complete: () => {
-        this.apiService.removeToken();
-        this.isLoggedIn = false;
-        this.currentUser = null;
-
-        window.dispatchEvent(new CustomEvent('authStatusChanged'));
+        this.success = 'Logout successful! Redirecting to Home page...';
+        this.loading = false;
 
         setTimeout(() => {
           this.router.navigate(['/']);
-        }, 500);
+        });
       },
     });
   }
