@@ -52,9 +52,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
   private loadUserProfile() {
     this.apiService.getProfile().subscribe({
-      next: (response) => {
-        console.log('User profile loaded');
-      },
+      next: (response) => {},
       error: (error) => {
         console.error('Failed to load user profile:', error);
         if (error.status === 401) {
