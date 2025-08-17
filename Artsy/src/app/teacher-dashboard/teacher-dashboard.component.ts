@@ -168,7 +168,6 @@ export class TeacherDashboardComponent implements OnInit {
         this.teacherCourses = response || [];
         this.updateStats();
         this.coursesLoading = false;
-        console.log('Loaded courses:', this.teacherCourses);
       },
       error: (error) => {
         console.error('Error loading teacher courses:', error);
