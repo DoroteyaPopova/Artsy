@@ -24,16 +24,8 @@ export class TeacherGuard implements CanActivate {
         const isTeacherOrAdmin = this.checkTeacherAccess(user);
 
         if (isTeacherOrAdmin) {
-          console.log(
-            `Teacher access granted for: ${user.email} (role: ${user.role})`
-          );
           return true;
         } else {
-          console.log(
-            `Teacher access denied for: ${user.email} (role: ${
-              user.role || 'user'
-            })`
-          );
           alert('Access denied. Teacher privileges required.');
           this.router.navigate(['/']);
           return false;

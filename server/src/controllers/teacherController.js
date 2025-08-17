@@ -245,7 +245,6 @@ const approveTeacherApplication = async (req, res) => {
       const applicantUser = await User.findById(application.userId);
       if (applicantUser) {
          await applicantUser.promoteToTeacher(adminUserId);
-         console.log(`User ${applicantUser.username} promoted to teacher role`);
       }
 
       await application.populate("userId", "username email");

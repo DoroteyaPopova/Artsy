@@ -24,16 +24,8 @@ export class AdminGuard implements CanActivate {
         const isAdmin = this.checkAdminAccess(user);
 
         if (isAdmin) {
-          console.log(
-            `Admin access granted for: ${user.email} (role: ${user.role})`
-          );
           return true;
         } else {
-          console.log(
-            `Admin access denied for: ${user.email} (role: ${
-              user.role || 'user'
-            })`
-          );
           alert('Access denied. Administrator privileges required.');
           this.router.navigate(['/']);
           return false;
