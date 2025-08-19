@@ -15,6 +15,9 @@ import {
   faArrowLeft,
   faChalkboardTeacher,
   faRefresh,
+  faPlay,
+  faTimes,
+  faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import { ApiService } from '../api.service';
 import { ConfirmationModalComponent } from '../shared/confirmation-modal/confirmation-modal.component';
@@ -78,6 +81,9 @@ export class TeacherDashboardComponent implements OnInit {
   faArrowLeft = faArrowLeft;
   faChalkboardTeacher = faChalkboardTeacher;
   faRefresh = faRefresh;
+  faPlay = faPlay;
+  faTimes = faTimes;
+  faCheck = faCheck;
 
   teacherCourses: TeacherCourse[] = [];
   currentUser: any = null;
@@ -88,8 +94,10 @@ export class TeacherDashboardComponent implements OnInit {
   success = '';
 
   showDeleteModal = false;
+  showStatusModal = false;
   modalLoading = false;
   selectedCourse: TeacherCourse | null = null;
+  selectedStatus: string = '';
 
   stats = {
     totalCourses: 0,
@@ -203,7 +211,7 @@ export class TeacherDashboardComponent implements OnInit {
         duration: { weeks: 8, totalHours: 32 },
         maxStudents: 15,
         currentStudents: 12,
-        status: 'published',
+        status: 'draft',
         startDate: '2024-02-01',
         endDate: '2024-03-28',
         createdAt: '2024-01-15',
@@ -238,6 +246,56 @@ export class TeacherDashboardComponent implements OnInit {
 
   viewCourse(courseId: string) {
     this.router.navigate(['/courses', courseId]);
+  }
+
+  publishCourse(course: TeacherCourse) {
+    this.selectedCourse = course;
+    this.selectedStatus = 'published';
+    this.showStatusModal = true;
+  }
+
+  cancelCourse(course: TeacherCourse) {
+    this.selectedCourse = course;
+    this.selectedStatus = 'cancelled';
+    this.showStatusModal = true;
+  }
+
+  onStatusChangeConfirmed() {
+    if (!this.selectedCourse || !this.selectedStatus) return;
+
+    this.modalLoading = true;
+
+    this.apiService
+      .updateCourseStatus(this.selectedCourse._id, this.selectedStatus)
+      .subscribe({
+        next: (response) => {
+          const statusText =
+            this.selectedStatus === 'published' ? 'published' : 'cancelled';
+          this.success = `Course ${statusText} successfully!`;
+          this.hideStatusModal();
+          this.loadTeacherCourses();
+          setTimeout(() => (this.success = ''), 3000);
+        },
+        error: (error) => {
+          console.error('Error updating course status:', error);
+          this.error =
+            error.error?.error ||
+            'Failed to update course status. Please try again.';
+          this.hideStatusModal();
+          setTimeout(() => (this.error = ''), 5000);
+        },
+      });
+  }
+
+  onStatusChangeCancelled() {
+    this.hideStatusModal();
+  }
+
+  hideStatusModal() {
+    this.showStatusModal = false;
+    this.modalLoading = false;
+    this.selectedCourse = null;
+    this.selectedStatus = '';
   }
 
   deleteCourse(courseId: string) {
@@ -364,6 +422,14 @@ export class TeacherDashboardComponent implements OnInit {
     return course.currentStudents === 0;
   }
 
+  canPublishCourse(course: TeacherCourse): boolean {
+    return course.status === 'draft';
+  }
+
+  canCancelCourse(course: TeacherCourse): boolean {
+    return course.status === 'published' || course.status === 'draft';
+  }
+
   getCourseDuration(course: TeacherCourse): string {
     if (!course.duration) return 'Duration TBD';
     return `${course.duration.weeks} weeks (${course.duration.totalHours}h total)`;
@@ -372,6 +438,37 @@ export class TeacherDashboardComponent implements OnInit {
   getCoursePrice(course: TeacherCourse): string {
     if (!course.cost) return 'Price TBD';
     return `${course.cost.amount} ${course.cost.currency}`;
+  }
+
+  getStatusModalTitle(): string {
+    return this.selectedStatus === 'published'
+      ? 'Publish Course'
+      : 'Cancel Course';
+  }
+
+  getStatusModalMessage(): string {
+    const action = this.selectedStatus === 'published' ? 'publish' : 'cancel';
+    return `Are you sure you want to ${action} this course?`;
+  }
+
+  getStatusModalConfirmText(): string {
+    return this.selectedStatus === 'published'
+      ? 'Publish Course'
+      : 'Cancel Course';
+  }
+
+  getStatusModalLoadingText(): string {
+    return this.selectedStatus === 'published'
+      ? 'Publishing...'
+      : 'Cancelling...';
+  }
+
+  getStatusModalType(): 'info' | 'warning' | 'danger' {
+    return this.selectedStatus === 'published' ? 'info' : 'warning';
+  }
+
+  getStatusModalIcon() {
+    return this.selectedStatus === 'published' ? this.faCheck : this.faTimes;
   }
 
   goBack() {

@@ -414,10 +414,12 @@
   display: flex;
   justify-content: space-between;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .action-btn {
   flex: 1;
+  min-width: 80px;
   padding: 10px 15px;
   border: none;
   border-radius: 5px;
@@ -449,6 +451,24 @@
   background-color: #218838;
 }
 
+.publish-btn {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.publish-btn:hover {
+  background-color: #138496;
+}
+
+.cancel-btn {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.cancel-btn:hover {
+  background-color: #e0a800;
+}
+
 .delete-btn {
   background-color: #dc3545;
   color: white;
@@ -469,6 +489,8 @@
   font-size: 0.85rem;
   font-weight: 500;
   cursor: help;
+  flex: 1;
+  min-width: 80px;
 }
 
 .warning-text {
@@ -523,6 +545,7 @@
     flex-direction: column;
     text-align: center;
     gap: 15px;
+    width: 100%;
   }
 
   .header-content h1 {
@@ -534,6 +557,10 @@
   .header-actions {
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .courses-grid {
@@ -551,6 +578,11 @@
   .course-actions {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .action-btn {
+    flex: none;
+    width: 100%;
   }
 
   .course-title {

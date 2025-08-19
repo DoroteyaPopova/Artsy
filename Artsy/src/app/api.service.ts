@@ -448,6 +448,16 @@ export class ApiService {
     });
   }
 
+  updateCourseStatus(courseId: string, status: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+
+    return this.http.patch(
+      `${this.baseUrl}/courses/${courseId}/status`,
+      { status },
+      { headers }
+    );
+  }
+
   // Delete course (teacher only)
   deleteCourse(courseId: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/courses/${courseId}`, {

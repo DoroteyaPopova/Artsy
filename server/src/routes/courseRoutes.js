@@ -6,6 +6,7 @@ const {
    getSingleCourse,
    createCourse,
    updateCourse,
+   updateCourseStatus,
    deleteCourse,
    getCoursesByTeacher,
    enrollInCourse,
@@ -23,6 +24,7 @@ router.get("/teacher/:teacherId", getCoursesByTeacher); // GET /courses/teacher/
 // Protected routes (require authentication)
 router.post("/", createCourse); // POST /courses - Create new course (teachers only)
 router.put("/:id", updateCourse); // PUT /courses/:id - Update course (teacher only)
+router.patch("/:id/status", updateCourseStatus); // PATCH /courses/:id/status - Update course status (teacher only)
 router.delete("/:id", deleteCourse); // DELETE /courses/:id - Delete course (teacher only)
 
 // Enrollment routes

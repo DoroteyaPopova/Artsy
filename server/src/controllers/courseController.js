@@ -396,6 +396,111 @@ const updateCourse = async (req, res) => {
    }
 };
 
+const updateCourseStatus = async (req, res) => {
+   try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const authHeader = req.headers.authorization;
+      const token = authHeader && authHeader.split(" ")[1];
+
+      if (!token) {
+         return res.status(401).json({ error: "No token provided" });
+      }
+
+      const decodedToken = jwt.verify(token, process.env.JWT_Secret);
+      const userId = decodedToken.userId;
+
+      const validStatuses = [
+         "draft",
+         "published",
+         "ongoing",
+         "completed",
+         "cancelled",
+      ];
+      if (!status || !validStatuses.includes(status)) {
+         return res.status(400).json({
+            error:
+               "Invalid status. Must be one of: " + validStatuses.join(", "),
+         });
+      }
+
+      const existingCourse = await Course.findById(id);
+      if (!existingCourse) {
+         return res.status(404).json({ error: "Course not found" });
+      }
+
+      if (existingCourse.teacher.toString() !== userId) {
+         return res
+            .status(403)
+            .json({ error: "Not authorized to update this course" });
+      }
+
+      const currentStatus = existingCourse.status;
+
+      const allowedTransitions = {
+         draft: ["published", "cancelled"],
+         published: ["ongoing", "cancelled"],
+         ongoing: ["completed", "cancelled"],
+         completed: [],
+         cancelled: [],
+      };
+
+      if (
+         !allowedTransitions[currentStatus] ||
+         !allowedTransitions[currentStatus].includes(status)
+      ) {
+         return res.status(400).json({
+            error: `Cannot change status from '${currentStatus}' to '${status}'`,
+         });
+      }
+
+      if (status === "published") {
+         if (
+            !existingCourse.title ||
+            !existingCourse.description ||
+            !existingCourse.startDate ||
+            !existingCourse.endDate ||
+            !existingCourse.schedule ||
+            !existingCourse.cost
+         ) {
+            return res.status(400).json({
+               error: "Course must have all required information before publishing",
+            });
+         }
+
+         const now = new Date();
+         const startDate = new Date(existingCourse.startDate);
+         if (startDate <= now) {
+            return res.status(400).json({
+               error: "Cannot publish course with start date in the past",
+            });
+         }
+      }
+
+      const updatedCourse = await Course.findByIdAndUpdate(
+         id,
+         {
+            status,
+            ...(status === "published" && { publishedAt: new Date() }),
+            ...(status === "cancelled" && { cancelledAt: new Date() }),
+            ...(status === "completed" && { completedAt: new Date() }),
+         },
+         {
+            new: true,
+            runValidators: true,
+         }
+      ).populate("teacher", "username email");
+
+      res.status(200).json({
+         message: `Course status updated to ${status} successfully`,
+         course: updatedCourse,
+      });
+   } catch (error) {
+      console.error("Error updating course status:", error);
+      res.status(500).json({ error: error.message });
+   }
+};
+
 const deleteCourse = async (req, res) => {
    try {
       const { id } = req.params;
@@ -579,6 +684,7 @@ module.exports = {
    getSingleCourse,
    createCourse,
    updateCourse,
+   updateCourseStatus,
    deleteCourse,
    getCoursesByTeacher,
    enrollInCourse,

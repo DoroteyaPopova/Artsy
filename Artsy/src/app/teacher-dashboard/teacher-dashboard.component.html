@@ -160,9 +160,22 @@
 
           <div class="course-actions">
             <button
+              class="action-btn publish-btn"
+              (click)="publishCourse(course)"
+              title="Publish Course"
+              *ngIf="canPublishCourse(course)"
+            >
+              <fa-icon [icon]="faPlay"></fa-icon>
+              Publish
+            </button>
+
+            <button
               class="action-btn view-btn"
               (click)="viewCourse(course._id)"
               title="View Course"
+              *ngIf="
+                course.status === 'published' || course.status === 'ongoing'
+              "
             >
               <fa-icon [icon]="faEye"></fa-icon>
               View
@@ -172,16 +185,27 @@
               class="action-btn edit-btn"
               (click)="editCourse(course._id)"
               title="Edit Course"
+              *ngIf="course.status === 'draft' || course.status === 'published'"
             >
               <fa-icon [icon]="faEdit"></fa-icon>
               Edit
             </button>
 
             <button
+              class="action-btn cancel-btn"
+              (click)="cancelCourse(course)"
+              title="Cancel Course"
+              *ngIf="canCancelCourse(course)"
+            >
+              <fa-icon [icon]="faTimes"></fa-icon>
+              Cancel
+            </button>
+
+            <button
               class="action-btn delete-btn"
               (click)="deleteCourse(course._id)"
               title="Delete Course"
-              *ngIf="canDeleteCourse(course)"
+              *ngIf="canDeleteCourse(course) && course.status === 'draft'"
               [attr.aria-label]="'Delete course: ' + course.title"
             >
               <fa-icon [icon]="faTrash"></fa-icon>
@@ -189,7 +213,7 @@
             </button>
 
             <div
-              *ngIf="!canDeleteCourse(course)"
+              *ngIf="!canDeleteCourse(course) && course.status !== 'cancelled'"
               class="cannot-delete-warning"
               title="Cannot delete course with enrolled students"
             >
@@ -204,6 +228,7 @@
     </div>
   </div>
 
+  <!-- Delete Course Modal -->
   <app-confirmation-modal
     [isVisible]="showDeleteModal"
     [title]="'Delete Course'"
@@ -221,5 +246,20 @@
     "
     (confirmed)="onDeleteConfirmed()"
     (cancelled)="onDeleteCancelled()"
+  ></app-confirmation-modal>
+
+  <!-- Status Change Modal -->
+  <app-confirmation-modal
+    [isVisible]="showStatusModal"
+    [title]="getStatusModalTitle()"
+    [message]="getStatusModalMessage()"
+    [courseTitle]="selectedCourse?.title || ''"
+    [confirmText]="getStatusModalConfirmText()"
+    [loadingText]="getStatusModalLoadingText()"
+    [type]="getStatusModalType()"
+    [loading]="modalLoading"
+    [confirmIcon]="getStatusModalIcon()"
+    (confirmed)="onStatusChangeConfirmed()"
+    (cancelled)="onStatusChangeCancelled()"
   ></app-confirmation-modal>
 </main>

@@ -145,6 +145,15 @@ const CourseSchema = new mongoose.Schema(
          type: String,
          enum: ["draft", "published", "ongoing", "completed", "cancelled"],
          default: "draft",
+      }, // Status timestamps
+      publishedAt: {
+         type: Date,
+      },
+      cancelledAt: {
+         type: Date,
+      },
+      completedAt: {
+         type: Date,
       },
       // Requirements and materials
       requirements: {
