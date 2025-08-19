@@ -1,9 +1,7 @@
-// server/src/controllers/courseController.js
 const Course = require("../models/courseModel");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 
-// Get all courses (public - with filters)
 const getAllCourses = async (req, res) => {
    try {
       const {
@@ -17,7 +15,6 @@ const getAllCourses = async (req, res) => {
          limit = 12,
       } = req.query;
 
-      // Build filter
       const filter = {};
 
       if (
@@ -42,7 +39,6 @@ const getAllCourses = async (req, res) => {
          filter.teacher = teacher;
       }
 
-      // Build sort
       const sortOptions = {};
       const validSortFields = [
          "startDate",
@@ -55,7 +51,6 @@ const getAllCourses = async (req, res) => {
          sortOptions[sortBy] = order === "desc" ? -1 : 1;
       }
 
-      // Pagination
       const skip = (page - 1) * limit;
 
       const courses = await Course.find(filter)
@@ -81,7 +76,6 @@ const getAllCourses = async (req, res) => {
    }
 };
 
-// Get single course by ID
 const getSingleCourse = async (req, res) => {
    try {
       const { id } = req.params;
@@ -100,7 +94,6 @@ const getSingleCourse = async (req, res) => {
    }
 };
 
-// Create new course (teachers only)
 const createCourse = async (req, res) => {
    try {
       const authHeader = req.headers.authorization;
@@ -113,7 +106,6 @@ const createCourse = async (req, res) => {
       const decodedToken = jwt.verify(token, process.env.JWT_Secret);
       const userId = decodedToken.userId;
 
-      // Check if user is a teacher
       const user = await User.findById(userId);
       if (!user) {
          return res.status(404).json({ error: "User not found" });
@@ -142,7 +134,6 @@ const createCourse = async (req, res) => {
          tags,
       } = req.body;
 
-      // Validation
       if (
          !title ||
          !description ||
@@ -155,7 +146,6 @@ const createCourse = async (req, res) => {
          return res.status(400).json({ error: "Missing required fields" });
       }
 
-      // Create course
       const newCourse = new Course({
          title,
          description,
@@ -187,7 +177,6 @@ const createCourse = async (req, res) => {
    }
 };
 
-// Update course (teacher only)
 const updateCourse = async (req, res) => {
    try {
       const { id } = req.params;
@@ -201,33 +190,212 @@ const updateCourse = async (req, res) => {
       const decodedToken = jwt.verify(token, process.env.JWT_Secret);
       const userId = decodedToken.userId;
 
-      // Check if course exists and user owns it
+      const user = await User.findById(userId);
+      if (!user) {
+         return res.status(404).json({ error: "User not found" });
+      }
+
       const existingCourse = await Course.findById(id);
       if (!existingCourse) {
          return res.status(404).json({ error: "Course not found" });
       }
 
-      if (existingCourse.teacher.toString() !== userId) {
+      const isOwner = existingCourse.teacher.toString() === userId;
+      const isAdmin = user.role === "admin";
+
+      if (!isOwner && !isAdmin) {
          return res
             .status(403)
             .json({ error: "Not authorized to update this course" });
       }
 
-      const updatedCourse = await Course.findByIdAndUpdate(id, req.body, {
+      const updateData = { ...req.body };
+
+      if (existingCourse.currentStudents > 0) {
+         if (
+            updateData.maxStudents !== undefined &&
+            updateData.maxStudents < existingCourse.currentStudents
+         ) {
+            return res.status(400).json({
+               error: `Cannot reduce maximum students below current enrollment (${existingCourse.currentStudents} students)`,
+            });
+         }
+
+         const courseStarted = new Date(existingCourse.startDate) <= new Date();
+         if (courseStarted) {
+            const criticalFields = [
+               "startDate",
+               "schedule.daysOfWeek",
+               "schedule.startTime",
+               "schedule.endTime",
+            ];
+
+            const modifiedCriticalFields = [];
+
+            if (
+               updateData.startDate &&
+               new Date(updateData.startDate).getTime() !==
+                  new Date(existingCourse.startDate).getTime()
+            ) {
+               modifiedCriticalFields.push("start date");
+            }
+
+            if (updateData.schedule) {
+               if (
+                  updateData.schedule.daysOfWeek &&
+                  JSON.stringify(updateData.schedule.daysOfWeek.sort()) !==
+                     JSON.stringify(existingCourse.schedule.daysOfWeek.sort())
+               ) {
+                  modifiedCriticalFields.push("class days");
+               }
+               if (
+                  updateData.schedule.startTime &&
+                  updateData.schedule.startTime !==
+                     existingCourse.schedule.startTime
+               ) {
+                  modifiedCriticalFields.push("start time");
+               }
+               if (
+                  updateData.schedule.endTime &&
+                  updateData.schedule.endTime !==
+                     existingCourse.schedule.endTime
+               ) {
+                  modifiedCriticalFields.push("end time");
+               }
+            }
+
+            if (modifiedCriticalFields.length > 0) {
+               if (!isAdmin) {
+                  return res.status(400).json({
+                     error: `Cannot modify ${modifiedCriticalFields.join(
+                        ", "
+                     )} after course has started with enrolled students. Please contact an administrator if changes are necessary.`,
+                  });
+               }
+
+               console.log(
+                  `Admin ${
+                     user.username
+                  } modified critical fields for ongoing course ${id}: ${modifiedCriticalFields.join(
+                     ", "
+                  )}`
+               );
+            }
+         }
+      }
+
+      if (updateData.startDate && updateData.endDate) {
+         const start = new Date(updateData.startDate);
+         const end = new Date(updateData.endDate);
+
+         if (start >= end) {
+            return res.status(400).json({
+               error: "End date must be after start date",
+            });
+         }
+      }
+
+      if (updateData.status) {
+         const validTransitions = {
+            draft: ["published", "cancelled"],
+            published: ["ongoing", "cancelled"],
+            ongoing: ["completed", "cancelled"],
+            completed: [],
+            cancelled: ["draft"],
+         };
+
+         const currentStatus = existingCourse.status;
+         const newStatus = updateData.status;
+
+         if (currentStatus !== newStatus) {
+            if (!validTransitions[currentStatus].includes(newStatus)) {
+               return res.status(400).json({
+                  error: `Invalid status transition from ${currentStatus} to ${newStatus}`,
+               });
+            }
+
+            if (newStatus === "published") {
+               const requiredFields = [
+                  "title",
+                  "description",
+                  "duration",
+                  "cost",
+                  "schedule",
+                  "startDate",
+                  "endDate",
+               ];
+
+               for (const field of requiredFields) {
+                  const value = updateData[field] || existingCourse[field];
+                  if (!value) {
+                     return res.status(400).json({
+                        error: `Cannot publish course without ${field}`,
+                     });
+                  }
+               }
+            }
+
+            if (
+               newStatus === "cancelled" &&
+               existingCourse.currentStudents > 0
+            ) {
+               if (!isAdmin) {
+                  return res.status(400).json({
+                     error: `Cannot cancel course with ${existingCourse.currentStudents} enrolled students. Please contact an administrator.`,
+                  });
+               }
+               console.log(
+                  `Admin ${user.username} cancelled course ${id} with ${existingCourse.currentStudents} students`
+               );
+            }
+         }
+      }
+
+      if (updateData.tags && Array.isArray(updateData.tags)) {
+         updateData.tags = updateData.tags
+            .map((tag) => tag.trim())
+            .filter((tag) => tag !== "")
+            .slice(0, 10);
+      }
+
+      const updatedCourse = await Course.findByIdAndUpdate(id, updateData, {
          new: true,
          runValidators: true,
       }).populate("teacher", "username email");
+
+      const significantChanges = [];
+      if (updateData.status && updateData.status !== existingCourse.status) {
+         significantChanges.push(
+            `status: ${existingCourse.status} → ${updateData.status}`
+         );
+      }
+      if (
+         updateData.maxStudents &&
+         updateData.maxStudents !== existingCourse.maxStudents
+      ) {
+         significantChanges.push(
+            `max students: ${existingCourse.maxStudents} → ${updateData.maxStudents}`
+         );
+      }
+
+      if (significantChanges.length > 0) {
+         console.log(
+            `Course ${id} updated by ${user.username} (${
+               user.role
+            }): ${significantChanges.join(", ")}`
+         );
+      }
 
       res.status(200).json({
          message: "Course updated successfully",
          course: updatedCourse,
       });
    } catch (error) {
+      console.error("Error updating course:", error);
       res.status(500).json({ error: error.message });
    }
 };
 
-// Delete course (teacher only)
 const deleteCourse = async (req, res) => {
    try {
       const { id } = req.params;
@@ -241,7 +409,6 @@ const deleteCourse = async (req, res) => {
       const decodedToken = jwt.verify(token, process.env.JWT_Secret);
       const userId = decodedToken.userId;
 
-      // Check if course exists and user owns it
       const courseData = await Course.findById(id);
       if (!courseData) {
          return res.status(404).json({ error: "Course not found" });
@@ -253,7 +420,6 @@ const deleteCourse = async (req, res) => {
             .json({ error: "Not authorized to delete this course" });
       }
 
-      // Don't allow deletion if there are enrolled students
       if (courseData.currentStudents > 0) {
          return res.status(400).json({
             error: "Cannot delete course with enrolled students",
@@ -268,7 +434,6 @@ const deleteCourse = async (req, res) => {
    }
 };
 
-// Get courses by teacher
 const getCoursesByTeacher = async (req, res) => {
    try {
       const { teacherId } = req.params;
@@ -289,7 +454,6 @@ const getCoursesByTeacher = async (req, res) => {
    }
 };
 
-// Enroll in course
 const enrollInCourse = async (req, res) => {
    try {
       const { id } = req.params;
@@ -331,7 +495,6 @@ const enrollInCourse = async (req, res) => {
    }
 };
 
-// Unenroll from course
 const unenrollFromCourse = async (req, res) => {
    try {
       const { id } = req.params;
@@ -364,7 +527,6 @@ const unenrollFromCourse = async (req, res) => {
    }
 };
 
-// Get user's enrolled courses
 const getUserEnrolledCourses = async (req, res) => {
    try {
       const authHeader = req.headers.authorization;
@@ -387,7 +549,6 @@ const getUserEnrolledCourses = async (req, res) => {
    }
 };
 
-// Get course statistics
 const getCourseStats = async (req, res) => {
    try {
       const stats = await Course.aggregate([
