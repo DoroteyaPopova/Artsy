@@ -373,15 +373,15 @@ export class ProfileComponent implements OnInit {
   getCourseStatusColor(status: string): string {
     switch (status) {
       case 'active':
-        return '#28a745';
+        return '#dfa60aff';
       case 'completed':
-        return '#6c757d';
+        return '#28a745';
       case 'upcoming':
         return '#007bff';
       case 'dropped':
         return '#dc3545';
       default:
-        return '#6c757d';
+        return '#3e66a3ff';
     }
   }
 
