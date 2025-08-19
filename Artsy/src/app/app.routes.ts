@@ -14,6 +14,7 @@ import { EditPaintingComponent } from './edit-painting/edit-painting.component';
 import { TeacherFormComponent } from './teacher-form/teacher-form.component';
 import { TeacherDashboardComponent } from './teacher-dashboard/teacher-dashboard.component';
 import { CreateCourseComponent } from './teacher-dashboard/create-course/create-course.component';
+import { EditCourseComponent } from './teacher-dashboard/edit-course/edit-course.component';
 import { CourseDetailsComponent } from './course-details/course-details.component';
 
 // Admin Components
@@ -75,6 +76,8 @@ export const routes: Routes = [
     component: TeacherFormComponent,
     canActivate: [AuthGuard],
   },
+
+  // Teacher routes - only accessible by teachers
   {
     path: 'teacher-dashboard',
     component: TeacherDashboardComponent,
@@ -85,6 +88,13 @@ export const routes: Routes = [
     component: CreateCourseComponent,
     canActivate: [TeacherGuard],
   },
+  {
+    path: 'edit-course/:id',
+    component: EditCourseComponent,
+    canActivate: [TeacherGuard],
+  },
+
+  // Course details - public
   { path: 'courses/:id', component: CourseDetailsComponent },
 
   // Admin routes - only accessible by admins
