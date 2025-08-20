@@ -372,7 +372,10 @@
                 </p>
               </div>
 
-              <div class="progress-section" *ngIf="course.status === 'active'">
+              <div
+                class="progress-section"
+                *ngIf="course.status === 'published'"
+              >
                 <div class="progress-header">
                   <span>Progress</span>
                   <span>{{ course.progress }}%</span>
@@ -389,28 +392,28 @@
               <div class="course-actions">
                 <button
                   class="course-action-btn"
-                  *ngIf="course.status === 'active'"
+                  *ngIf="course.status === 'published'"
                   [routerLink]="['/courses', course._id]"
                 >
-                  Continue Learning
+                  Check Course
                 </button>
                 <button
                   class="course-action-btn secondary"
                   *ngIf="course.status === 'completed'"
                   [routerLink]="['/courses', course._id]"
                 >
-                  Review Materials
+                  Check Course
                 </button>
                 <button
                   class="course-action-btn"
-                  *ngIf="course.status === 'upcoming'"
+                  *ngIf="course.status === 'ongoing'"
                   [routerLink]="['/courses', course._id]"
                 >
                   View Details
                 </button>
                 <button
                   class="course-action-btn secondary"
-                  *ngIf="course.status === 'dropped'"
+                  *ngIf="course.status === 'cancelled'"
                   [routerLink]="['/courses', course._id]"
                 >
                   View Course

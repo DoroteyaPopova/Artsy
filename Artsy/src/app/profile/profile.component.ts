@@ -56,7 +56,7 @@ interface CourseEnrollment {
   schedule: any;
   formattedSchedule?: string;
   progress: number;
-  status: 'active' | 'completed' | 'upcoming' | 'dropped';
+  status: 'published' | 'completed' | 'ongoing' | 'cancelled';
   enrolledAt: string;
   duration: {
     weeks: number;
@@ -372,13 +372,13 @@ export class ProfileComponent implements OnInit {
 
   getCourseStatusColor(status: string): string {
     switch (status) {
-      case 'active':
+      case 'published':
         return '#dfa60aff';
       case 'completed':
         return '#28a745';
-      case 'upcoming':
+      case 'ongoing':
         return '#007bff';
-      case 'dropped':
+      case 'cancelled':
         return '#dc3545';
       default:
         return '#3e66a3ff';
