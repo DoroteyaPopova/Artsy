@@ -35,6 +35,7 @@ export class EditCourseComponent implements OnInit {
   courseForm!: FormGroup;
   courseId: string = '';
   originalCourse: any = null;
+  originalFormValues: any = null; // Store original form values for comparison
 
   loading = true;
   saving = false;
@@ -227,10 +228,12 @@ export class EditCourseComponent implements OnInit {
     const startDate = new Date(course.startDate).toISOString().split('T')[0];
     const endDate = new Date(course.endDate).toISOString().split('T')[0];
 
+    // Clear existing tags
     while (this.tagsArray.length !== 0) {
       this.tagsArray.removeAt(0);
     }
 
+    // Add tags if they exist
     if (course.tags && course.tags.length > 0) {
       course.tags.forEach((tag: string) => {
         this.tagsArray.push(
@@ -239,6 +242,7 @@ export class EditCourseComponent implements OnInit {
       });
     }
 
+    // Patch form values
     this.courseForm.patchValue({
       title: course.title,
       description: course.description,
@@ -255,7 +259,7 @@ export class EditCourseComponent implements OnInit {
         currency: course.cost.currency,
       },
       schedule: {
-        daysOfWeek: course.schedule.daysOfWeek,
+        daysOfWeek: course.schedule.daysOfWeek || [],
         startTime: course.schedule.startTime,
         endTime: course.schedule.endTime,
         timezone: course.schedule.timezone || 'UTC',
@@ -266,6 +270,14 @@ export class EditCourseComponent implements OnInit {
       requirements: course.requirements || '',
       materials: course.materials || '',
     });
+
+    // Store original form values for comparison
+    this.storeOriginalFormValues();
+  }
+
+  storeOriginalFormValues() {
+    // Deep clone of form values to avoid reference issues
+    this.originalFormValues = JSON.parse(JSON.stringify(this.courseForm.value));
   }
 
   get tagsArray() {
@@ -305,23 +317,36 @@ export class EditCourseComponent implements OnInit {
   }
 
   hasChanges(): boolean {
-    if (!this.originalCourse) return false;
+    if (!this.originalFormValues) return false;
 
-    const formValue = this.courseForm.value;
-    const original = this.originalCourse;
+    const currentValues = this.courseForm.value;
 
-    return (
-      formValue.title !== original.title ||
-      formValue.description !== original.description ||
-      formValue.category !== original.category ||
-      formValue.level !== original.level ||
-      formValue.status !== original.status ||
-      formValue.duration.weeks !== original.duration.weeks ||
-      formValue.duration.totalHours !== original.duration.totalHours ||
-      formValue.cost.amount !== original.cost.amount ||
-      formValue.cost.currency !== original.cost.currency ||
-      formValue.maxStudents !== original.maxStudents
-    );
+    // Helper function to deeply compare objects
+    const deepEqual = (obj1: any, obj2: any): boolean => {
+      if (obj1 === obj2) return true;
+
+      if (obj1 == null || obj2 == null) return obj1 === obj2;
+
+      if (typeof obj1 !== typeof obj2) return false;
+
+      if (Array.isArray(obj1) && Array.isArray(obj2)) {
+        if (obj1.length !== obj2.length) return false;
+        return obj1.every((val, index) => deepEqual(val, obj2[index]));
+      }
+
+      if (typeof obj1 === 'object') {
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+
+        if (keys1.length !== keys2.length) return false;
+
+        return keys1.every((key) => deepEqual(obj1[key], obj2[key]));
+      }
+
+      return obj1 === obj2;
+    };
+
+    return !deepEqual(currentValues, this.originalFormValues);
   }
 
   resetForm() {
@@ -358,6 +383,7 @@ export class EditCourseComponent implements OnInit {
 
       const formData = this.courseForm.value;
 
+      // Filter out empty tags
       formData.tags = formData.tags.filter((tag: string) => tag.trim() !== '');
 
       const updateData = {
@@ -366,11 +392,16 @@ export class EditCourseComponent implements OnInit {
         endDate: new Date(formData.endDate),
       };
 
+      console.log('Submitting update data:', updateData); // Debug log
+
       this.apiService.updateCourse(this.courseId, updateData).subscribe({
         next: (response) => {
           this.success = 'Course updated successfully!';
           this.saving = false;
           this.originalCourse = response.course;
+
+          // Update the stored original values to reflect the saved state
+          this.storeOriginalFormValues();
 
           setTimeout(() => {
             this.router.navigate(['/teacher-dashboard'], {
@@ -406,6 +437,7 @@ export class EditCourseComponent implements OnInit {
     this.router.navigate(['/teacher-dashboard']);
   }
 
+  // Getter methods for form controls
   get title() {
     return this.courseForm.get('title');
   }
