@@ -149,11 +149,17 @@ const CourseSchema = new mongoose.Schema(
       publishedAt: {
          type: Date,
       },
-      cancelledAt: {
+      ongoingAt: {
          type: Date,
       },
       completedAt: {
          type: Date,
+      },
+      cancelledAt: {
+         type: Date,
+      },
+      currentStatus: {
+         type: String,
       },
       // Requirements and materials
       requirements: {
