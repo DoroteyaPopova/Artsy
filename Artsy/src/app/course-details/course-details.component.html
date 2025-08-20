@@ -1,4 +1,32 @@
 <main class="course-details">
+  <div
+    *ngIf="showSuccessNotification"
+    class="notification success-notification"
+    [@slideInOut]
+  >
+    <div class="notification-content">
+      <fa-icon [icon]="faCheckCircle" class="notification-icon"></fa-icon>
+      <span class="notification-message">{{ notificationMessage }}</span>
+      <button class="notification-close" (click)="hideNotification()">
+        <fa-icon [icon]="faTimesCircle"></fa-icon>
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="showErrorNotification"
+    class="notification error-notification"
+    [@slideInOut]
+  >
+    <div class="notification-content">
+      <fa-icon [icon]="faTimesCircle" class="notification-icon"></fa-icon>
+      <span class="notification-message">{{ notificationMessage }}</span>
+      <button class="notification-close" (click)="hideNotification()">
+        <fa-icon [icon]="faTimesCircle"></fa-icon>
+      </button>
+    </div>
+  </div>
+
   <div *ngIf="loading" class="loading-container">
     <p>Loading course details...</p>
   </div>
@@ -40,10 +68,12 @@
             [class.available]="canEnroll(course)"
             [class.full]="isCourseFull(course)"
             [class.started]="hasStarted(course)"
+            [class.enrolled]="isUserEnrolled"
           >
             {{ getEnrollmentStatus(course) }}
           </span>
         </div>
+
         <button
           *ngIf="canEnroll(course)"
           class="enroll-btn"
@@ -51,6 +81,15 @@
         >
           <fa-icon [icon]="faGraduationCap"></fa-icon>
           Enroll Now
+        </button>
+
+        <button
+          *ngIf="canUnenroll(course)"
+          class="unenroll-btn"
+          (click)="confirmUnenrollFromCourse()"
+        >
+          <fa-icon [icon]="faSignOutAlt"></fa-icon>
+          Unenroll
         </button>
       </div>
     </div>
@@ -130,12 +169,25 @@
 
   <app-confirmation-modal
     [isVisible]="showLoginModal"
-    [title]="'Login'"
+    [title]="'Login Required'"
     [message]="'Please log in to enroll in courses'"
-    [confirmText]="'Login'"
+    [confirmText]="'Go to Login'"
     [type]="'warning'"
     (confirmed)="onLoginConfirmed()"
     (cancelled)="onLoginCancelled()"
+  >
+  </app-confirmation-modal>
+
+  <app-confirmation-modal
+    [isVisible]="showUnenrollModal"
+    [title]="'Confirm Unenrollment'"
+    [message]="
+      'Are you sure you want to unenroll from this course? You will lose access to course materials and your progress will be saved.'
+    "
+    [confirmText]="'Unenroll'"
+    [type]="'danger'"
+    (confirmed)="onUnenrollConfirmed()"
+    (cancelled)="onUnenrollCancelled()"
   >
   </app-confirmation-modal>
 </main>

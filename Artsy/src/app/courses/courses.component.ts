@@ -14,6 +14,7 @@ import {
   faSearch,
   faRefresh,
   faStar,
+  faSignOutAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { faStar as starOutline } from '@fortawesome/free-regular-svg-icons';
 import { ApiService } from '../api.service';
@@ -55,6 +56,12 @@ interface Course {
   tags?: string[];
   spotsAvailable?: number;
   createdAt: string;
+  enrolledStudents?: Array<{
+    student: string;
+    enrolledAt: string;
+    progress: number;
+    status: string;
+  }>;
 }
 
 @Component({
@@ -81,11 +88,16 @@ export class CoursesComponent implements OnInit {
   faRefresh = faRefresh;
   faStar = faStar;
   starOutline = starOutline;
+  faSignOutAlt = faSignOutAlt;
 
   showLoginModal = false;
+  showUnenrollModal = false;
+  unenrollingCourse: Course | null = null;
 
   courses: Course[] = [];
   filteredCourses: Course[] = [];
+  userEnrolledCourses: string[] = [];
+  currentUser: any = null;
 
   loading = true;
   error = '';
@@ -130,7 +142,35 @@ export class CoursesComponent implements OnInit {
   constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit() {
+    this.checkAuthStatus();
     this.loadCourses();
+    this.loadUserEnrolledCourses();
+  }
+
+  checkAuthStatus() {
+    if (this.apiService.isLoggedIn()) {
+      this.apiService.getProfile().subscribe({
+        next: (response) => {
+          this.currentUser = response.user;
+        },
+        error: (error) => {
+          console.error('Error getting user profile:', error);
+        },
+      });
+    }
+  }
+
+  loadUserEnrolledCourses() {
+    if (!this.apiService.isLoggedIn()) return;
+
+    this.apiService.getUserEnrolledCourses().subscribe({
+      next: (courses) => {
+        this.userEnrolledCourses = courses.map((course: any) => course._id);
+      },
+      error: (error) => {
+        console.error('Error loading user enrolled courses:', error);
+      },
+    });
   }
 
   loadCourses() {
@@ -216,6 +256,11 @@ export class CoursesComponent implements OnInit {
   refreshCourses() {
     this.currentPage = 1;
     this.loadCourses();
+    this.loadUserEnrolledCourses();
+  }
+
+  isUserEnrolled(courseId: string): boolean {
+    return this.userEnrolledCourses.includes(courseId);
   }
 
   enrollInCourse(courseId: string) {
@@ -227,12 +272,46 @@ export class CoursesComponent implements OnInit {
     this.apiService.enrollInCourse(courseId).subscribe({
       next: (response) => {
         this.success = 'Successfully enrolled in course!';
+        this.userEnrolledCourses.push(courseId);
         this.loadCourses();
         setTimeout(() => (this.success = ''), 3000);
       },
       error: (error) => {
         console.error('Error enrolling in course:', error);
-        alert(error.error?.error || 'Failed to enroll in course');
+        this.error = error.error?.error || 'Failed to enroll in course';
+        setTimeout(() => (this.error = ''), 5000);
+      },
+    });
+  }
+
+  confirmUnenrollFromCourse(course: Course) {
+    this.unenrollingCourse = course;
+    this.showUnenrollModal = true;
+  }
+
+  unenrollFromCourse() {
+    if (!this.unenrollingCourse) return;
+
+    this.apiService.unenrollFromCourse(this.unenrollingCourse._id).subscribe({
+      next: (response) => {
+        this.success = `Successfully unenrolled from ${
+          this.unenrollingCourse!.title
+        }!`;
+
+        this.userEnrolledCourses = this.userEnrolledCourses.filter(
+          (id) => id !== this.unenrollingCourse!._id
+        );
+        this.loadCourses();
+        this.showUnenrollModal = false;
+        this.unenrollingCourse = null;
+        setTimeout(() => (this.success = ''), 3000);
+      },
+      error: (error) => {
+        console.error('Error unenrolling from course:', error);
+        this.error = error.error?.error || 'Failed to unenroll from course';
+        this.showUnenrollModal = false;
+        this.unenrollingCourse = null;
+        setTimeout(() => (this.error = ''), 5000);
       },
     });
   }
@@ -241,8 +320,18 @@ export class CoursesComponent implements OnInit {
     this.router.navigate(['/login']);
     this.showLoginModal = false;
   }
+
   onLoginCancelled() {
     this.showLoginModal = false;
+  }
+
+  onUnenrollConfirmed() {
+    this.unenrollFromCourse();
+  }
+
+  onUnenrollCancelled() {
+    this.showUnenrollModal = false;
+    this.unenrollingCourse = null;
   }
 
   formatSchedule(schedule: any): string {
@@ -292,11 +381,18 @@ export class CoursesComponent implements OnInit {
 
   canEnroll(course: Course): boolean {
     return (
-      !this.isCourseFull(course) && new Date(course.startDate) > new Date()
+      !this.isCourseFull(course) &&
+      new Date(course.startDate) > new Date() &&
+      !this.isUserEnrolled(course._id)
     );
   }
 
+  canUnenroll(course: Course): boolean {
+    return this.isUserEnrolled(course._id) && course.status !== 'completed';
+  }
+
   getEnrollmentStatus(course: Course): string {
+    if (this.isUserEnrolled(course._id)) return 'Enrolled';
     if (this.isCourseFull(course)) return 'Full';
     if (new Date(course.startDate) <= new Date()) return 'Started';
     return `${this.getSpotsAvailable(course)} spots left`;

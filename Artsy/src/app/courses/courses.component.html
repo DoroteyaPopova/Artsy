@@ -201,7 +201,10 @@
             <span
               class="status-badge"
               [class.full]="isCourseFull(course)"
-              [class.available]="!isCourseFull(course)"
+              [class.available]="
+                !isCourseFull(course) && !isUserEnrolled(course._id)
+              "
+              [class.enrolled]="isUserEnrolled(course._id)"
             >
               {{ getEnrollmentStatus(course) }}
             </span>
@@ -215,6 +218,15 @@
             >
               <fa-icon [icon]="faGraduationCap"></fa-icon>
               Enroll Now
+            </button>
+
+            <button
+              class="unenroll-btn"
+              *ngIf="canUnenroll(course)"
+              (click)="confirmUnenrollFromCourse(course)"
+            >
+              <fa-icon [icon]="faSignOutAlt"></fa-icon>
+              Unenroll
             </button>
 
             <button class="view-btn" [routerLink]="['/courses', course._id]">
@@ -258,12 +270,27 @@
 
   <app-confirmation-modal
     [isVisible]="showLoginModal"
-    [title]="'Login'"
+    [title]="'Login Required'"
     [message]="'Please log in to enroll in courses'"
-    [confirmText]="'Login'"
+    [confirmText]="'Go to Login'"
     [type]="'warning'"
     (confirmed)="onLoginConfirmed()"
     (cancelled)="onLoginCancelled()"
+  >
+  </app-confirmation-modal>
+
+  <app-confirmation-modal
+    [isVisible]="showUnenrollModal"
+    [title]="'Confirm Unenrollment'"
+    [message]="
+      'Are you sure you want to unenroll from &quot;' +
+      (unenrollingCourse?.title || '') +
+      '&quot;? You will lose access to course materials.'
+    "
+    [confirmText]="'Unenroll'"
+    [type]="'danger'"
+    (confirmed)="onUnenrollConfirmed()"
+    (cancelled)="onUnenrollCancelled()"
   >
   </app-confirmation-modal>
 </main>

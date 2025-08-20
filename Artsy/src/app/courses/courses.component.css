@@ -374,6 +374,11 @@ main {
   color: #721c24;
 }
 
+.status-badge.enrolled {
+  background-color: #cce7ff;
+  color: #004085;
+}
+
 .action-buttons {
   display: flex;
   gap: 10px;
@@ -381,6 +386,7 @@ main {
 }
 
 .enroll-btn,
+.unenroll-btn,
 .view-btn {
   flex: 1;
   padding: 12px 20px;
@@ -404,6 +410,16 @@ main {
 
 .enroll-btn:hover {
   background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.unenroll-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.unenroll-btn:hover {
+  background-color: #c82333;
   transform: translateY(-1px);
 }
 

@@ -3,6 +3,81 @@
   margin: 0 auto;
   padding: 20px;
   min-height: calc(100vh - 150px);
+  position: relative;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  max-width: 400px;
+  min-width: 300px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.success-notification {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.error-notification {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notification-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.notification-message {
+  flex: 1;
+  font-weight: 500;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.notification-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.success-notification .notification-close:hover {
+  background-color: rgba(21, 87, 36, 0.1);
+}
+
+.error-notification .notification-close:hover {
+  background-color: rgba(114, 28, 36, 0.1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .loading-container,
@@ -133,7 +208,13 @@
   color: #856404;
 }
 
-.enroll-btn {
+.status-badge.enrolled {
+  background-color: #cce7ff;
+  color: #004085;
+}
+
+.enroll-btn,
+.unenroll-btn {
   background-color: #28a745;
   color: white;
   border: none;
@@ -146,12 +227,22 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
   width: 100%;
 }
 
 .enroll-btn:hover {
   background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.unenroll-btn {
+  background-color: #dc3545;
+}
+
+.unenroll-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
 }
 
 .course-content {
@@ -216,6 +307,14 @@
 }
 
 @media (max-width: 768px) {
+  .notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    min-width: auto;
+  }
+
   .course-header {
     grid-template-columns: 1fr;
     gap: 20px;
