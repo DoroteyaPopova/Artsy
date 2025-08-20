@@ -418,6 +418,20 @@
                 >
                   View Course
                 </button>
+
+                <button
+                  class="course-action-btn unenroll"
+                  *ngIf="canUnenrollFromCourse(course)"
+                  (click)="
+                    confirmUnenrollFromCourse(
+                      course._id,
+                      course.courseName || course.title
+                    )
+                  "
+                >
+                  <fa-icon [icon]="faSignOutAlt"></fa-icon>
+                  Unenroll
+                </button>
               </div>
             </div>
           </div>
@@ -436,6 +450,33 @@
       <div class="modal-actions">
         <button class="cancel-btn" (click)="cancelDelete()">Cancel</button>
         <button class="delete-btn" (click)="deletePainting()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="showUnenrollConfirm"
+    class="modal-overlay"
+    (click)="cancelUnenroll()"
+  >
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Confirm Unenrollment</h3>
+      <p>
+        Are you sure you want to unenroll from "<strong>{{
+          unenrollingCourseName
+        }}</strong
+        >"?
+      </p>
+      <p>
+        You will lose access to course materials and your progress will be
+        saved.
+      </p>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="cancelUnenroll()">Cancel</button>
+        <button class="delete-btn" (click)="unenrollFromCourse()">
+          <fa-icon [icon]="faSignOutAlt"></fa-icon>
+          Unenroll
+        </button>
       </div>
     </div>
   </div>

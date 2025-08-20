@@ -858,6 +858,22 @@ main {
   box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
 }
 
+.course-action-btn.unenroll {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.course-action-btn.unenroll:hover {
+  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  transform: translateY(-2px);
+}
+
+.course-action-btn.unenroll fa-icon {
+  font-size: 0.9rem;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;

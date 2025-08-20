@@ -13,6 +13,7 @@ import {
   faPaintBrush,
   faCog,
   faChalkboardTeacher,
+  faSignOutAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { faStar as starOutline } from '@fortawesome/free-regular-svg-icons';
 import { ApiService } from '../api.service';
@@ -85,6 +86,7 @@ export class ProfileComponent implements OnInit {
   starOutline = starOutline;
   faCog = faCog;
   faChalkboardTeacher = faChalkboardTeacher;
+  faSignOutAlt = faSignOutAlt;
 
   user: UserProfile | null = null;
   userPaintings: UserPainting[] = [];
@@ -110,6 +112,10 @@ export class ProfileComponent implements OnInit {
 
   showDeleteConfirm = false;
   deletingPaintingId: string | null = null;
+
+  showUnenrollConfirm = false;
+  unenrollingCourseId: string | null = null;
+  unenrollingCourseName: string = '';
 
   constructor(private apiService: ApiService, private router: Router) {}
 
@@ -352,6 +358,49 @@ export class ProfileComponent implements OnInit {
         this.deletingPaintingId = null;
       },
     });
+  }
+
+  confirmUnenrollFromCourse(courseId: string, courseName: string) {
+    this.unenrollingCourseId = courseId;
+    this.unenrollingCourseName = courseName;
+    this.showUnenrollConfirm = true;
+  }
+
+  cancelUnenroll() {
+    this.showUnenrollConfirm = false;
+    this.unenrollingCourseId = null;
+    this.unenrollingCourseName = '';
+  }
+
+  unenrollFromCourse() {
+    if (!this.unenrollingCourseId) return;
+
+    this.apiService.unenrollFromCourse(this.unenrollingCourseId).subscribe({
+      next: (response) => {
+        this.userCourses = this.userCourses.filter(
+          (course) => course._id !== this.unenrollingCourseId
+        );
+        this.showUnenrollConfirm = false;
+        this.unenrollingCourseId = null;
+        this.unenrollingCourseName = '';
+        this.success = 'Successfully unenrolled from the course!';
+
+        setTimeout(() => {
+          this.success = '';
+        }, 3000);
+      },
+      error: (error) => {
+        console.error('Error unenrolling from course:', error);
+        this.error = error.error?.error || 'Failed to unenroll from course';
+        this.showUnenrollConfirm = false;
+        this.unenrollingCourseId = null;
+        this.unenrollingCourseName = '';
+      },
+    });
+  }
+
+  canUnenrollFromCourse(course: CourseEnrollment): boolean {
+    return course.status !== 'completed';
   }
 
   getStarArray(rating: number): boolean[] {
