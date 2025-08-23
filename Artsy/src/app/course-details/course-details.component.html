@@ -2,7 +2,6 @@
   <div
     *ngIf="showSuccessNotification"
     class="notification success-notification"
-    [@slideInOut]
   >
     <div class="notification-content">
       <fa-icon [icon]="faCheckCircle" class="notification-icon"></fa-icon>
@@ -13,11 +12,7 @@
     </div>
   </div>
 
-  <div
-    *ngIf="showErrorNotification"
-    class="notification error-notification"
-    [@slideInOut]
-  >
+  <div *ngIf="showErrorNotification" class="notification error-notification">
     <div class="notification-content">
       <fa-icon [icon]="faTimesCircle" class="notification-icon"></fa-icon>
       <span class="notification-message">{{ notificationMessage }}</span>
