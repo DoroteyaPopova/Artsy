@@ -137,12 +137,6 @@ export class CourseDetailsComponent implements OnInit {
         return studentId === this.currentUser.id;
       }
     );
-
-    console.log('Enrollment check:', {
-      currentUserId: this.currentUser.id,
-      enrolledStudents: this.course.enrolledStudents,
-      isUserEnrolled: this.isUserEnrolled,
-    });
   }
 
   enrollInCourse() {
